@@ -11,6 +11,7 @@ client secret for use with the Health Graph API.
 """
 
 import content_type
+from Points import Points
 from authmgr import AuthManager
 from sessionmgr import Session, NullSession, init_session, get_session
 from resources import (PersonalRecordType, ResourceLink,

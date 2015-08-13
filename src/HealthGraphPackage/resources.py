@@ -95,7 +95,7 @@ class APIobject(object):
         if link is not None:
             if cls_override is None:
                 cls = globals().get(link.clsname)
-                print (cls)
+                # print (cls)
             else:
                 cls = globals().get(cls_override)
             if inspect.isclass(cls) and issubclass(cls, BaseResource):
@@ -711,6 +711,10 @@ class StrengthActivity(Resource):
     
     def __init__(self, resource, session=None):
         super(StrengthActivity, self).__init__(resource, session=session)
+
+    #getting reps from dictionary
+    def get_reps(self):
+      return self._prop_defs.get('exercises').get('repetitions')
 
     def get_comment_thread(self):
         return self._get_linked_resource(self._prop_dict['comments'])

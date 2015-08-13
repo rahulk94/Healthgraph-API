@@ -92,11 +92,20 @@ def welcome():
         strength_act_iter = user.get_strength_activity_iter()
         a = act_iter.next()
         b = strength_act_iter.next()
-                
+        # print(b.get_activity_detail().get_reps())
+
+        print(strength_act_iter)
+        print(strength_act_iter.next())
+
+        #found something here, act_iter gives the while iterable while act_iter.next() gives individual feed item         
+        # points = HealthGraphPackage.Points(act_iter,strength_act_iter.next())
+        # points.get_total_points()
+
+
 #         print(a.get_activity_detail())
 #         print(b.get_activity_detail().get('exercises')[0].get('primary_muscle_group'))
         
-        activities = [act_iter.next() for _ in range(3)]
+        activities = [act_iter.next() for _ in range(1)]
         return bottle.template('welcome.html', 
                                profile=profile,
                                activities=activities, 

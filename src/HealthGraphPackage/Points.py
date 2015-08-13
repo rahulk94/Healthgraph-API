@@ -58,12 +58,12 @@ class Points:
 
 	def get_total_points(self):
 		total_points = 0
-		for exercise in self.fitness_activity_iter:
-			exercise_points = self.get_points(exercise)
-			total_points += exercise_points
-
-		# for exercise in self.strength_activity_iter:
+		# for exercise in self.fitness_activity_iter:
 		# 	exercise_points = self.get_points(exercise)
+		# 	total_points += exercise_points
+
+		for exercise in self.strength_activity_iter:
+			exercise_points = self.get_points(exercise)
 		# 	total_points += exercise_points
 		
 		return total_points
@@ -72,9 +72,12 @@ class Points:
 		activity = exercise.get("uri")[0]
 
 		exercise_type = exercise.get("type")
-		duration = exercise.get("duration")/60
+		
 
 		if activity == "FitnessActivity":
+
+			duration = exercise.get("duration")/60
+
 			if exercise_type == "Other":
 				#sports. Requires going into URI for secondary_type field
 				# points = self.sports[exercise_type] * duration
@@ -87,11 +90,15 @@ class Points:
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
-			# weight = activity.getWeight()
-			# reps = activity.getReps()
-			# sets = activity.getSets()
-			# tonnage = weight * sets * reps
-			# return tonnage/100
+			exActivity = exercise.get_activity_detail()
+
+			for ex_set in exActivity.get('exercises'):
+				print(ex_set)
+				# weight = ex_set.get('')
+				# reps = activity.getReps()
+				# sets = activity.getSets()
+				# tonnage = weight * sets * reps
+				# return tonnage/100
 			pass
 
 		# 	#do shit
