@@ -63,15 +63,24 @@ class Points:
 		# 	total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
+
 			exercise_points = self.get_feed_points(feed_item)
 		# 	total_points += exercise_points
 		
+
 		return total_points
 
 	def get_feed_points(self, feed_item):
-		points = 0
-		weight = feed_item.get_activity_detail().get('exercises')[0].get('sets')[0].get('weight')
-		print (weight)
+		# print(feed_item)
+		tonnage = 0
+		str_act = feed_item.get_activity_detail()
+		info_set = str_act.get('exercises')[0].get('sets')
+
+		for ex_set in info_set:
+			weight = ex_set.get('weight')
+			reps = ex_set.get('repetitions')
+			tonnage += weight * reps
+		return tonnage
 
 
 

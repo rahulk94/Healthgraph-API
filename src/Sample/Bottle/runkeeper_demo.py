@@ -91,11 +91,11 @@ def welcome():
         
         strength_act_iter = user.get_strength_activity_iter()
         a = act_iter.next()
-        b = strength_act_iter.next()
-        # print(b.get_activity_detail().get_reps())
+        # b = strength_act_iter.next()
+        # print(b.get_activity_detail())
 
-        print(strength_act_iter)
-        print(strength_act_iter.next())
+        # print(strength_act_iter)
+        # print(strength_act_iter.next())
 
         #found something here, act_iter gives the while iterable while act_iter.next() gives individual feed item         
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
