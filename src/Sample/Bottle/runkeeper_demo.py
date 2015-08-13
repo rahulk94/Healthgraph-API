@@ -99,8 +99,8 @@ def welcome():
 
         #found something here, act_iter gives the while iterable while act_iter.next() gives individual feed item         
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
-        points.get_total_points()
-
+        total_points = points.get_total_points()
+        print("Total points for the past week was: " + str(total_points))
 
 #         print(a.get_activity_detail())
 #         print(b.get_activity_detail().get('exercises')[0].get('primary_muscle_group'))
