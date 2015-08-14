@@ -614,8 +614,8 @@ class FitnessActivityFeedItem(FeedItem):
         
 
     def get_activity_detail(self):
-        print "---------------------------------------------------"
-        print self._prop_dict['uri']
+#         print "---------------------------------------------------"
+#         print self._prop_dict['uri']
         return self._get_linked_resource(self._prop_dict['uri'])
     
     def get_activity_summary(self):

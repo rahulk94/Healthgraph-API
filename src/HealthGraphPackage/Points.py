@@ -40,6 +40,7 @@ class Points:
 					,'Frisbee': 0.75
 					,'Broomball':1
 					,'Hand Ball':1
+					,'Basketball':1.5
 
 						}
 
@@ -58,9 +59,11 @@ class Points:
 
 	def get_total_points(self):
 		total_points = 0
-		# for exercise in self.fitness_activity_iter:
-		# 	exercise_points = self.get_points(exercise)
-		# 	total_points += exercise_points
+		
+		for feed_item in self.fitness_activity_iter:
+			
+			exercise_points = self.get_points(feed_item)
+			total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
 
@@ -86,14 +89,14 @@ class Points:
 			duration = feed.get("duration")/60
 
 			if exercise_type == "Other":
-				#sports. Requires going into URI for secondary_type field
-				# points = self.sports[exercise_type] * duration
-				# return points
-				pass
+				sport_act = feed.get_activity_detail()
+				sport_type = sport_act.get('secondary_type')
+				points = self.sports[sport_type] * duration
+				print("POINTS FOR " + sport_type + " = " + str(points))
+				return points
 			else:
 				points = self.cardio[exercise_type] * duration
-				print("POINTS FOR EX = " + str(points))
-				print("duration = " + str(duration))
+				print("POINTS FOR " + exercise_type + " = " + str(points))
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
