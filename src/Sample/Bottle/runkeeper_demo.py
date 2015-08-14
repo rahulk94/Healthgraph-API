@@ -87,31 +87,65 @@ def welcome():
         user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
         profile = user.get_profile()
         records = user.get_records()
-        act_iter = user.get_fitness_activity_iter()
         
+        act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
-        a = act_iter.next()
-        # b = strength_act_iter.next()
-        # print(b.get_activity_detail())
-
-        # print(strength_act_iter)
-        # print(strength_act_iter.next())
-
-        #found something here, act_iter gives the while iterable while act_iter.next() gives individual feed item         
+        
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
         total_points = points.get_total_points()
         print("Total points for the past week was: " + str(total_points))
 
-#         print(a.get_activity_detail())
-#         print(b.get_activity_detail().get('exercises')[0].get('primary_muscle_group'))
-        
-        activities = [act_iter.next() for _ in range(1)]
+        write_to_file(user)
+
+        activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
                                profile=profile,
                                activities=activities, 
                                records=records.get_totals())
     else:
         bottle.redirect('/')
+
+
+def write_to_file(userToken):
+    #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
+    outputFile = open("myFile.txt", "w")
+    fitness_act_iter = userToken.get_fitness_activity_iter()
+ 
+    outputFile.write("<fiss><Header><Version>1.2</Version><ModName>Rahul</ModName></Header>\n<Data>\n\n")
+    outputFile.write("<Last_update_data>xx-xx-xxxx</Last_update_data> \n\n")
+ 
+    #Format each exercise and add it to file
+    i = 1
+    for exercise in fitness_act_iter:
+        exercise_type = exercise.get("type")
+        if (exercise_type == "OTHER"):
+            exercise_type = exercise.get_activity_detail().get("secondary_type") 
+        
+        fitness_exercise = "<fitness_exercise " + str(i) + "> "
+        fitness_exercise += "<type> " + exercise_type + " </type> "
+        fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        fitness_exercise += "</fitness_exercise " + str(i) + ">"
+        
+        outputFile.write(fitness_exercise + "\n")
+        i = i + 1
+ 
+    outputFile.write("\n")
+ 
+    i = 1
+    strength_act_iter = userToken.get_strength_activity_iter()
+    for exercise in strength_act_iter:
+        exercise_details = exercise.get_activity_detail()
+        
+        strength_exercise = "<strength_exercise " + str(i) + "> "
+        strength_exercise += "<type> " + exercise_details.get("exercises")[0].get("secondary_type") + " </type>"
+        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        
+        outputFile.write(strength_exercise + "\n")
+        i = i + 1
+ 
+    outputFile.write("\n</Data>\n</fiss>")
+ 
+    outputFile.close()
 
 @bottle.route('/logout')
 def logout():
