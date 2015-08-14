@@ -19,6 +19,7 @@ import optparse
 import ConfigParser
 import bottle
 import HealthGraphPackage
+import HealthGraphPackage.Points
 from beaker.middleware import SessionMiddleware
 
 __author__ = "Ali Onur Uyar"
@@ -92,11 +93,18 @@ def welcome():
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
         
+<<<<<<< HEAD
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
 #         total_points = points.get_total_points()
+=======
+        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter)
+        # total_points = points.get_total_points()
+>>>>>>> 6c27526303e4a126d055ea01d8de6171b0f223f8
         # print("Total points for the past week was: " + str(total_points))
 
         write_to_file(user, points)
+
+        print("Write to file complete")
 
         activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
@@ -111,7 +119,7 @@ def write_to_file(userToken, points):
     
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
-    file_name = "exercise data.txt"
+    file_name = "Exercise_data.txt"
     previous_import_date = ""
     if os.path.isfile(path_to_FISS + file_name):
         #TODO
@@ -133,11 +141,7 @@ def write_to_file(userToken, points):
     i = 1
     fitness_act_iter = userToken.get_fitness_activity_iter()
     for exercise in fitness_act_iter:
-        exercise_type = exercise.get("type")
-        exercise_details = None
-        if (exercise_type == "OTHER"):
-            exercise_details = exercise.get_activity_detail()
-            exercise_type = exercise_details.get("secondary_type")
+        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
         fitness_exercise = "<fitness_exercise " + str(i) + "> "
         fitness_exercise += "<type> " + exercise_type + " </type> "
@@ -153,13 +157,13 @@ def write_to_file(userToken, points):
     i = 1
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
-        exercise_details = exercise.get_activity_detail()
+        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
         strength_exercise = "<strength_exercise " + str(i) + "> "
-        strength_exercise += "<type> " + exercise_details.get("exercises")[0].get("secondary_type") + " </type>"
+        strength_exercise += "<type> " + exercise_type + " </type> "
         strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time>"
-        strength_exercise += " </strength_exercise " + str(i) + ">"
+        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        strength_exercise += "</strength_exercise " + str(i) + ">"
 
         output_file.write(strength_exercise + "\n")
         i = i + 1

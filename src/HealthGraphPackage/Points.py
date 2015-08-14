@@ -98,7 +98,7 @@ class Points:
 				return points
 			else:
 				points = self.cardio[exercise_type] * duration
-# 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
@@ -111,7 +111,7 @@ class Points:
 				reps = get_weight(ex_set)
 				tonnage += weight * reps
 				
-# 				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
+				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
 				
 			return int(round(tonnage))
 
