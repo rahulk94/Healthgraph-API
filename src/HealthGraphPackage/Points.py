@@ -65,38 +65,25 @@ class Points:
 		for feed_item in self.strength_activity_iter:
 
 			#may need to do a check here for date before adding points of a feed
-			exercise_points = self.get_feed_points(feed_item)
+			exercise_points = self.get_points(feed_item)
 			print (exercise_points)
 			total_points += exercise_points
 		
 
 		return total_points
 
-	#This goes into the feed object, iterates through the sets of an exercise and creates tonnage of 1 exercise
-	def get_feed_points(self, feed_item):
-
-		tonnage = 0
-		str_act = feed_item.get_activity_detail()
-		info_set = str_act.get('exercises')[0].get('sets')
-
-		for ex_set in info_set:
-			weight = ex_set.get('weight')
-			reps = ex_set.get('repetitions')
-			tonnage += weight * reps
-		return int(round(tonnage))
 
 
+	#pass this an activity feed item and it will return points, it will iterate through exercies if it is a strength feed item
+	def get_points(self, feed):
+		activity = feed.get("uri")[0]
 
-
-	def get_points(self, exercise):
-		activity = exercise.get("uri")[0]
-
-		exercise_type = exercise.get("type")
+		exercise_type = feed.get("type")
 		
 
 		if activity == "FitnessActivity":
 
-			duration = exercise.get("duration")/60
+			duration = feed.get("duration")/60
 
 			if exercise_type == "Other":
 				#sports. Requires going into URI for secondary_type field
@@ -110,16 +97,15 @@ class Points:
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
-			exActivity = exercise.get_activity_detail()
-
-			for ex_set in exActivity.get('exercises'):
-				print(ex_set)
-				# weight = ex_set.get('')
-				# reps = activity.getReps()
-				# sets = activity.getSets()
-				# tonnage = weight * sets * reps
-				# return tonnage/100
-			pass
+			tonnage = 0
+			str_act = feed.get_activity_detail()
+			info_set = str_act.get('exercises')[0].get('sets')
+			
+			for ex_set in info_set:
+				weight = ex_set.get('weight')
+				reps = ex_set.get('repetitions')
+				tonnage += weight * reps
+			return int(round(tonnage))
 
 		# 	#do shit
 		# 	activity = activity.getActivity()
