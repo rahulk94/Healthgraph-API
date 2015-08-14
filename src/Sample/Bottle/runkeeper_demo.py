@@ -99,6 +99,8 @@ def welcome():
 
         write_to_file(user, points)
 
+        print("Write to file complete")
+
         activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
                                profile=profile,
@@ -134,11 +136,7 @@ def write_to_file(userToken, points):
     i = 1
     fitness_act_iter = userToken.get_fitness_activity_iter()
     for exercise in fitness_act_iter:
-        exercise_type = HealthGraphPackage.Points.get_type(exercise)
-        exercise_details = None
-        if (exercise_type == "OTHER"):
-            exercise_details = exercise.get_activity_detail()
-            exercise_type = exercise_details.get("secondary_type")
+        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
         fitness_exercise = "<fitness_exercise " + str(i) + "> "
         fitness_exercise += "<type> " + exercise_type + " </type> "
@@ -154,13 +152,13 @@ def write_to_file(userToken, points):
     i = 1
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
-        exercise_details = exercise.get_activity_detail()
+        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
         strength_exercise = "<strength_exercise " + str(i) + "> "
-        strength_exercise += "<type> " + exercise_details.get("exercises")[0].get("secondary_type") + " </type>"
+        strength_exercise += "<type> " + exercise_type + " </type> "
         strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time>"
-        strength_exercise += " </strength_exercise " + str(i) + ">"
+        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        strength_exercise += "</strength_exercise " + str(i) + ">"
 
         output_file.write(strength_exercise + "\n")
         i = i + 1
