@@ -14,6 +14,7 @@ Point the web browser to the following URL: http://127.0.0.1:8000
 
 import sys
 import os
+import time
 import optparse
 import ConfigParser
 import bottle
@@ -107,15 +108,30 @@ def welcome():
 
 
 def write_to_file(userToken):
+    
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
-    outputFile = open("myFile.txt", "w")
-    fitness_act_iter = userToken.get_fitness_activity_iter()
- 
-    outputFile.write("<fiss><Header><Version>1.2</Version><ModName>Rahul</ModName></Header>\n<Data>\n\n")
-    outputFile.write("<Last_update_data>xx-xx-xxxx</Last_update_data> \n\n")
- 
+    path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
+    file_name = "exercise data.txt"
+    previous_import_date = ""
+    if os.path.isfile(path_to_FISS + file_name):
+        #TODO
+        read_file = open(path_to_FISS + file_name)
+        for i, line in enumerate(read_file):
+            if i == 3:
+                previous_import_date = line
+                previous_import_date = previous_import_date[19:29]
+        read_file.close()
+
+
+    output_file = open(path_to_FISS + file_name, "w")
+
+    output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
+    todays_date = time.strftime("%d/%m/%Y")
+    output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
+
     #Format each exercise and add it to file
     i = 1
+    fitness_act_iter = userToken.get_fitness_activity_iter()
     for exercise in fitness_act_iter:
         exercise_type = exercise.get("type")
         if (exercise_type == "OTHER"):
@@ -124,12 +140,13 @@ def write_to_file(userToken):
         fitness_exercise = "<fitness_exercise " + str(i) + "> "
         fitness_exercise += "<type> " + exercise_type + " </type> "
         fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        # fitness_exercise += "<points> " + + " </points> "
         fitness_exercise += "</fitness_exercise " + str(i) + ">"
         
-        outputFile.write(fitness_exercise + "\n")
+        output_file.write(fitness_exercise + "\n")
         i = i + 1
  
-    outputFile.write("\n")
+    output_file.write("\n")
  
     i = 1
     strength_act_iter = userToken.get_strength_activity_iter()
@@ -138,14 +155,15 @@ def write_to_file(userToken):
         
         strength_exercise = "<strength_exercise " + str(i) + "> "
         strength_exercise += "<type> " + exercise_details.get("exercises")[0].get("secondary_type") + " </type>"
-        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        # strength_exercise += "<points> " + + " </points> "
+        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time>"
         
-        outputFile.write(strength_exercise + "\n")
+        output_file.write(strength_exercise + "\n")
         i = i + 1
  
-    outputFile.write("\n</Data>\n</fiss>")
+    output_file.write("\n</Data>\n</fiss>")
  
-    outputFile.close()
+    output_file.close()
 
 @bottle.route('/logout')
 def logout():
