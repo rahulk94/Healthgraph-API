@@ -111,7 +111,7 @@ def write_to_file(userToken, points):
     
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
-    file_name = "exercise data.txt"
+    file_name = "Exercise_data.txt"
     previous_import_date = ""
     if os.path.isfile(path_to_FISS + file_name):
         #TODO
