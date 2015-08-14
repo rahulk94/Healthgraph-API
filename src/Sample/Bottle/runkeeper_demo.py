@@ -19,6 +19,7 @@ import optparse
 import ConfigParser
 import bottle
 import HealthGraphPackage
+import HealthGraphPackage.Points
 from beaker.middleware import SessionMiddleware
 
 __author__ = "Ali Onur Uyar"
@@ -92,7 +93,7 @@ def welcome():
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
         
-        points = HealthGraphPackage.Points(act_iter,strength_act_iter)
+        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter)
         # total_points = points.get_total_points()
         # print("Total points for the past week was: " + str(total_points))
 
@@ -133,7 +134,7 @@ def write_to_file(userToken, points):
     i = 1
     fitness_act_iter = userToken.get_fitness_activity_iter()
     for exercise in fitness_act_iter:
-        exercise_type = exercise.get("type")
+        exercise_type = HealthGraphPackage.Points.get_type(exercise)
         exercise_details = None
         if (exercise_type == "OTHER"):
             exercise_details = exercise.get_activity_detail()
