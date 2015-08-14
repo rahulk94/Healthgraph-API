@@ -93,10 +93,10 @@ def welcome():
         strength_act_iter = user.get_strength_activity_iter()
         
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
-        total_points = points.get_total_points()
-        print("Total points for the past week was: " + str(total_points))
+        # total_points = points.get_total_points()
+        # print("Total points for the past week was: " + str(total_points))
 
-        write_to_file(user)
+        write_to_file(user, points)
 
         activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
@@ -107,7 +107,7 @@ def welcome():
         bottle.redirect('/')
 
 
-def write_to_file(userToken):
+def write_to_file(userToken, points):
     
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
@@ -134,13 +134,15 @@ def write_to_file(userToken):
     fitness_act_iter = userToken.get_fitness_activity_iter()
     for exercise in fitness_act_iter:
         exercise_type = exercise.get("type")
+        exercise_details = None
         if (exercise_type == "OTHER"):
-            exercise_type = exercise.get_activity_detail().get("secondary_type") 
+            exercise_details = exercise.get_activity_detail()
+            exercise_type = exercise_details.get("secondary_type")
         
         fitness_exercise = "<fitness_exercise " + str(i) + "> "
         fitness_exercise += "<type> " + exercise_type + " </type> "
+        fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
         fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-        # fitness_exercise += "<points> " + + " </points> "
         fitness_exercise += "</fitness_exercise " + str(i) + ">"
         
         output_file.write(fitness_exercise + "\n")
@@ -155,9 +157,10 @@ def write_to_file(userToken):
         
         strength_exercise = "<strength_exercise " + str(i) + "> "
         strength_exercise += "<type> " + exercise_details.get("exercises")[0].get("secondary_type") + " </type>"
-        # strength_exercise += "<points> " + + " </points> "
+        strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
         strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time>"
-        
+        strength_exercise += " </strength_exercise " + str(i) + ">"
+
         output_file.write(strength_exercise + "\n")
         i = i + 1
  
