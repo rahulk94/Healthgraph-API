@@ -93,13 +93,8 @@ def welcome():
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
         
-<<<<<<< HEAD
-        points = HealthGraphPackage.Points(act_iter,strength_act_iter)
-#         total_points = points.get_total_points()
-=======
         points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter)
         # total_points = points.get_total_points()
->>>>>>> 6c27526303e4a126d055ea01d8de6171b0f223f8
         # print("Total points for the past week was: " + str(total_points))
 
         write_to_file(user, points)
@@ -143,16 +138,40 @@ def write_to_file(userToken, points):
     for exercise in fitness_act_iter:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
-        fitness_exercise = "<fitness_exercise " + str(i) + "> "
-        fitness_exercise += "<type> " + exercise_type + " </type> "
-        fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-        fitness_exercise += "</fitness_exercise " + str(i) + ">"
-        
-        output_file.write(fitness_exercise + "\n")
-        i = i + 1
+        if HealthGraphPackage.Points.get_type(exercise) != 'Other':
+            fitness_exercise = "<fitness_exercise " + str(i) + "> "
+            fitness_exercise += "<type> " + exercise_type + " </type> "
+            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+            fitness_exercise += "</fitness_exercise " + str(i) + ">"
+            
+            output_file.write(fitness_exercise + "\n")
+            i = i + 1
  
     output_file.write("\n")
+    
+    
+    i = 1
+    fitness_act_iter = userToken.get_fitness_activity_iter()
+    for exercise in fitness_act_iter:
+        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+        
+        if HealthGraphPackage.Points.get_type(exercise) == 'Other':
+            fitness_exercise = "<sport_exercise " + str(i) + "> "
+            fitness_exercise += "<type> " + exercise_type + " </type> "
+            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+            fitness_exercise += "</fitness_exercise " + str(i) + ">"
+            
+            output_file.write(fitness_exercise + "\n")
+            i = i + 1
+ 
+    output_file.write("\n")
+    
+    
+    
+    
+    
  
     i = 1
     strength_act_iter = userToken.get_strength_activity_iter()
