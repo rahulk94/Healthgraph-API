@@ -161,7 +161,7 @@ def write_to_file(userToken, points):
             fitness_exercise += "<type> " + exercise_type + " </type> "
             fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
             fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</fitness_exercise " + str(i) + ">"
+            fitness_exercise += "</sport_exercise " + str(i) + ">"
             
             output_file.write(fitness_exercise + "\n")
             i = i + 1
