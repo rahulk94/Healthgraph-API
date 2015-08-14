@@ -92,22 +92,25 @@ class Points:
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
 				points = self.sports[sport_type] * duration
-				print("POINTS FOR " + sport_type + " = " + str(points))
+				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
 				points = self.cardio[exercise_type] * duration
-				print("POINTS FOR " + exercise_type + " = " + str(points))
+				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
 			tonnage = 0
 			str_act = feed.get_activity_detail()
 			info_set = get_exercise_set(str_act)
-			
+# 			print(str_act.get('exercises'))
 			for ex_set in info_set:
 				weight = get_weight(ex_set)
 				reps = get_weight(ex_set)
 				tonnage += weight * reps
+				
+				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
+				
 			return int(round(tonnage))
 
 	
@@ -136,6 +139,21 @@ def get_type(feed_item):
 
 def get_secondary_type(act):
 	return act.get('secondary_type')
+
+#Give me a feed item and I will return the activity name!
+def get_exer_name(feed_item):
+	#cardio activity
+	if ((get_activity_type(feed_item) == 'FitnessActivity') and not (get_type(feed_item) == 'Other')):
+		return get_type(feed_item)
+	#sport activity
+	elif get_type(feed_item) == 'Other':
+		sport_act = feed_item.get_activity_detail()
+		return get_secondary_type(sport_act)
+	#strength activity
+	elif get_activity_type(feed_item) == 'StrengthActivity':
+		str_act = feed_item.get_activity_detail()
+		return get_secondary_type(str_act.get('exercises')[0])
+
 
 #returning the list of the sets of a particular strength exercise
 def get_exercise_set(str_act):
