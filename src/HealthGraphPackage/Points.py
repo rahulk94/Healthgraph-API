@@ -62,11 +62,13 @@ class Points:
 		
 		for feed_item in self.fitness_activity_iter:
 			
+			print(get_start_time(feed_item))
 			exercise_points = self.get_points(feed_item)
 			total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
 
+			
 			#may need to do a check here for date before adding points of a feed
 			exercise_points = self.get_points(feed_item)
 # 			print (exercise_points)
@@ -92,11 +94,11 @@ class Points:
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
 				points = self.sports[sport_type] * duration
-				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+# 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
 				points = self.cardio[exercise_type] * duration
-				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+# 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 		elif activity == "StrengthActivity":
 			#Get type of exercise
@@ -109,7 +111,7 @@ class Points:
 				reps = get_weight(ex_set)
 				tonnage += weight * reps
 				
-				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
+# 				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
 				
 			return int(round(tonnage))
 
@@ -169,6 +171,7 @@ def get_reps(str_act):
 def get_activity_type(feed_item):
 	return feed_item.get("uri")[0]
 	
-	
+def get_start_time(act):
+	return act.get("start_time")
 	
 	

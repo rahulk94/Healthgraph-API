@@ -93,7 +93,7 @@ def welcome():
         strength_act_iter = user.get_strength_activity_iter()
         
         points = HealthGraphPackage.Points(act_iter,strength_act_iter)
-        # total_points = points.get_total_points()
+#         total_points = points.get_total_points()
         # print("Total points for the past week was: " + str(total_points))
 
         write_to_file(user, points)
