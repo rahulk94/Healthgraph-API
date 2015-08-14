@@ -1,0 +1,18 @@
+<fiss><Header><Version>1.2</Version><ModName>Rahul</ModName></Header>
+<Data>
+
+<Last_update_data>xx-xx-xxxx</Last_update_data> 
+
+<fitness_exercise 1> <type> Cycling </type> <start_time> 2015-07-16 14:44:20 </start_time> </fitness_exercise 1>
+<fitness_exercise 2> <type> Cycling </type> <start_time> 2015-04-30 00:00:00 </start_time> </fitness_exercise 2>
+<fitness_exercise 3> <type> Other </type> <start_time> 2015-04-27 00:00:00 </start_time> </fitness_exercise 3>
+<fitness_exercise 4> <type> Running </type> <start_time> 2015-04-27 00:00:00 </start_time> </fitness_exercise 4>
+
+<strength_exercise 1> <type> Bench Press </type><start_time> 2015-08-02 22:13:44 </start_time> 
+<strength_exercise 2> <type> Crunch </type><start_time> 2015-07-28 16:58:31 </start_time> 
+<strength_exercise 3> <type> Bench Press </type><start_time> 2015-07-16 14:38:59 </start_time> 
+<strength_exercise 4> <type> Bulgarian Dumbbell Split Squat Jump </type><start_time> 2015-04-30 00:00:00 </start_time> 
+<strength_exercise 5> <type> Deadlift </type><start_time> 2015-04-27 00:00:00 </start_time> 
+
+</Data>
+</fiss>
