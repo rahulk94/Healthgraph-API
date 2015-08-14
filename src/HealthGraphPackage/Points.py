@@ -1,4 +1,4 @@
-import healthgraph
+import HealthGraphPackage
 
 class Points:
 
