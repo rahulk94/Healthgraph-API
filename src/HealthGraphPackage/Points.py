@@ -69,7 +69,7 @@ class Points:
 
 			#may need to do a check here for date before adding points of a feed
 			exercise_points = self.get_points(feed_item)
-			print (exercise_points)
+# 			print (exercise_points)
 			total_points += exercise_points
 		
 
@@ -79,9 +79,9 @@ class Points:
 
 	#pass this an activity feed item and it will return points, it will iterate through exercies if it is a strength feed item
 	def get_points(self, feed):
-		activity = feed.get("uri")[0]
+		activity = get_activity_type(feed)
 
-		exercise_type = feed.get("type")
+		exercise_type = get_type(feed)
 		
 
 		if activity == "FitnessActivity":
@@ -90,7 +90,7 @@ class Points:
 
 			if exercise_type == "Other":
 				sport_act = feed.get_activity_detail()
-				sport_type = sport_act.get('secondary_type')
+				sport_type = get_secondary_type(sport_act)
 				points = self.sports[sport_type] * duration
 				print("POINTS FOR " + sport_type + " = " + str(points))
 				return points
@@ -102,20 +102,15 @@ class Points:
 			#Get type of exercise
 			tonnage = 0
 			str_act = feed.get_activity_detail()
-			info_set = str_act.get('exercises')[0].get('sets')
+			info_set = get_exercise_set(str_act)
 			
 			for ex_set in info_set:
-				weight = ex_set.get('weight')
-				reps = ex_set.get('repetitions')
+				weight = get_weight(ex_set)
+				reps = get_weight(ex_set)
 				tonnage += weight * reps
 			return int(round(tonnage))
 
-		# 	#do shit
-		# 	activity = activity.getActivity()
-		# 	time = activity.getDuration()
-		# 	points = sports[activity] * time
-
-		# 	return points
+	
 
 		# else if activity.getType() == strength Activity:
 		# 	#do shit
@@ -128,3 +123,34 @@ class Points:
 		# 	return tonnage/100
 
 		return 0
+	
+	
+	
+
+#WRAPPER METHODS FOR DICTIONARY INFO RETRIEVAL	
+def get_exercise_type(act):
+	pass
+
+def get_type(feed_item):
+	return feed_item.get("type")
+
+def get_secondary_type(act):
+	return act.get('secondary_type')
+
+#returning the list of the sets of a particular strength exercise
+def get_exercise_set(str_act):
+	return str_act.get('exercises')[0].get('sets')
+
+def get_weight(str_act):
+	return str_act.get('weight')
+
+def get_reps(str_act):
+	return str_act.get('repetitions')
+
+#gets the activity type of a feed item (strength or fitness)
+def get_activity_type(feed_item):
+	return feed_item.get("uri")[0]
+	
+	
+	
+	

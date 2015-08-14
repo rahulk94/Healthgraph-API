@@ -621,6 +621,7 @@ class FitnessActivityFeedItem(FeedItem):
     def get_activity_summary(self):
         print "---------------------------------------------------"
         return self._get_linked_resource(self._prop_dict['uri'], 'FitnessActivitySummary')
+    
 
 
 
@@ -643,6 +644,7 @@ class StrengthActivityFeedItem(FeedItem):
     def get_activity_summary(self):
         print "---------------------------------------------------"
         return self._get_linked_resource(self._prop_dict['uri'], 'FitnessActivitySummary')
+    
 
 
 class FitnessActivityIter(ResourceFeedIter):
