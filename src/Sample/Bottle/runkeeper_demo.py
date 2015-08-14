@@ -13,7 +13,9 @@ Point the web browser to the following URL: http://127.0.0.1:8000
 """
 
 import sys
+import signal
 import os
+import subprocess
 import time
 import optparse
 import ConfigParser
@@ -167,11 +169,7 @@ def write_to_file(userToken, points):
             i = i + 1
  
     output_file.write("\n")
-    
-    
-    
-    
-    
+        
  
     i = 1
     strength_act_iter = userToken.get_strength_activity_iter()
@@ -195,7 +193,11 @@ def write_to_file(userToken, points):
 def logout():
     sess = bottle.request.environ['beaker.session']
     sess.delete()
+    subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
+    os.kill(os.getpid(), signal.CTRL_C_EVENT)
     bottle.redirect('/')
+
+
     
 @bottle.route('/view_access_token')
 def view_access_token():
@@ -298,7 +300,7 @@ def main(argv=None):
     app = SessionMiddleware(bottle.app(), sessionOpts)
     bottle.run(app=app, host=conf['bindaddr'], port=conf['bindport'], 
                reloader=cmd_opts.devel)
-    
+
 
 if __name__ == "__main__":
     sys.exit(main())
