@@ -2,7 +2,9 @@ import HealthGraphPackage
 
 class Points:
 
-	sports = {	
+	activity_database = {	
+
+					#sports activities
 					'Mountain Biking': 2.1
 					,'Competitive Rowing': 2
 					,'Kickboxing': 2.5
@@ -22,6 +24,7 @@ class Points:
 					,'Baseball': 1.5
 					,'American Football': 1.9
 					,'Snowboarding': 1.7
+					,'Skiiing': 1.7
 					,'Kayaking': 2
 					,'Krav Maga': 2.3
 					,'Beach Volleyball': 1.9
@@ -44,10 +47,38 @@ class Points:
 					,'Hand Ball': 2
 					,'Basketball': 2
 
+					#cardio activities
+					,'Bicycling': 2
+					,'Running': 2
+					,'Jogging': 1.6
+					,'Walking': 1.4
+					, 'Elliptical Trainer': 1.7
+					, 'Treadmill Running': 1.9
+					, 'Treadmill Jogging': 1.6
+					, 'Treadmill Walking': 1.3
+					, 'Jump Rope': 2.5
+					, 'Hiking': 1.7
+					, 'Rowing': 2
+					, 'Sprint': 2.5
+					, 'Stair Climber': 1.7
+					, 'Treadmill Sprint': 2.3
+					, 'Zumba': 1.6
+					, 'Boxing': 2.5
+					, 'Skating': 1.4
+					, 'Sled Push': 2.5
+					, 'Power Walking': 1.5
+					, 'Exercise Bike': 1.6
+					, 'Sled Sprint': 2.5
+					, 'Hill Sprint': 2.5
+					, 'Shuttle Run': 2.4
+					, 'Keg Carry': 2.5
+					, 'Tire Pull': 2.5
+
+
 						}
 
-	cardio = {	'Cycling':2
-				,'Running':2
+	cardio = {	
+
 			
 						}
 
@@ -64,7 +95,7 @@ class Points:
 		
 		for feed_item in self.fitness_activity_iter:
 			
-			print(get_start_time(feed_item))
+			# print(get_start_time(feed_item))
 			exercise_points = self.get_points(feed_item)
 			total_points += exercise_points
 
@@ -95,11 +126,11 @@ class Points:
 			if exercise_type == "Other":
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
-				points = self.sports[sport_type] * duration
+				points = self.activity_database[sport_type] * duration
 # 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
-				points = self.cardio[exercise_type] * duration
+				points = self.activity_database[exercise_type] * duration
 				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 		elif activity == "StrengthActivity":
@@ -115,7 +146,7 @@ class Points:
 				
 				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
 				
-			return int(round(tonnage))
+			return int(round(tonnage/29))
 
 	
 
