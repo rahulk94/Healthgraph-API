@@ -74,18 +74,17 @@ class Points:
 					, 'Keg Carry': 2.5
 					, 'Tire Pull': 2.5
 
-
 						}
 
-	cardio = {	
-
-			
-						}
+	
 
 
-	def __init__(self, fitness_iterator, strength_iterator):
+	def __init__(self, fitness_iterator, strength_iterator, weight_iterator):
 		self.fitness_activity_iter = fitness_iterator
 		self.strength_activity_iter = strength_iterator
+		self.bodyweight = get_bodyweight(weight_iterator.next())
+		
+		
 
 	def test_method(self):
 		print("jak is gay")
@@ -118,21 +117,31 @@ class Points:
 
 		exercise_type = get_type(feed)
 		
+		
+		
 
 		if activity == "FitnessActivity":
 
 			duration = feed.get("duration")/60
 
 			if exercise_type == "Other":
+				#sport activity
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
 				points = self.activity_database[sport_type] * duration
-# 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
-				points = self.activity_database[exercise_type] * duration
-				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
-				return points
+				#cardio
+				
+				try:
+				
+					points = self.activity_database[exercise_type] * duration
+					print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+					return points
+				except:
+					return 0
+			
 		elif activity == "StrengthActivity":
 			#Get type of exercise
 			tonnage = 0
@@ -140,25 +149,22 @@ class Points:
 			info_set = get_exercise_set(str_act)
 # 			print(str_act.get('exercises'))
 			for ex_set in info_set:
+				
 				weight = get_weight(ex_set)
-				reps = get_weight(ex_set)
+				
+				#adjusting for bodyweight exercises
+				if weight == 0:
+					weight = self.bodyweight*0.4
+					
+				reps = get_reps(ex_set)
+				print(reps)
 				tonnage += weight * reps
+				points = int(round(tonnage/29))
 				
-				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
+				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
-			return int(round(tonnage/29))
+			return points
 
-	
-
-		# else if activity.getType() == strength Activity:
-		# 	#do shit
-
-		# 	weight = activity.getWeight()
-		# 	reps = activity.getReps()
-		# 	sets = activity.getSets()
-		# 	tonnage = weight * sets * reps
-
-		# 	return tonnage/100
 
 		return 0
 	
@@ -206,5 +212,8 @@ def get_activity_type(feed_item):
 	
 def get_start_time(act):
 	return act.get("start_time")
+
+def get_bodyweight(user):
+	return user.get("weight")
 	
 	

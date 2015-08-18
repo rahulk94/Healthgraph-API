@@ -92,10 +92,11 @@ def welcome():
         
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
+        weight_iter = user.get_weight_measurement_iter()
         
-        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter)
-        # total_points = points.get_total_points()
-        # print("Total points for the past week was: " + str(total_points))
+        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter,weight_iter)
+#         total_points = points.get_total_points()
+#         print("Total points for the past week was: " + str(total_points))
 
         write_to_file(user, points)
 
@@ -298,7 +299,7 @@ def main(argv=None):
     app = SessionMiddleware(bottle.app(), sessionOpts)
     bottle.run(app=app, host=conf['bindaddr'], port=conf['bindport'], 
                reloader=cmd_opts.devel)
-    
+    #
 
 if __name__ == "__main__":
     sys.exit(main())
