@@ -3,44 +3,46 @@ import HealthGraphPackage
 class Points:
 
 	sports = {	
-					'Mountain Biking': 1.1
-					,'Competitive Rowing': 1
-					,'Kickboxing': 1.5
-					,'Soccer': 1
-					,'Brazilian Jiu-Jitsu': 1.2
-					,'Tennis': 1.4
-					,'Swimming': 1.2
-					,'Volleyball': 0.9
-					,'Ice Hockey': 1.3
-					,'Rock Climbing': 0.9
-					,'Racquetball': 1
-					,'Golf': 0.7
-					,'Squash': 1
-					,'Taekwondo': 1
-					,'Baseball':1
-					,'American Football':1
-					,'Snowboarding':1
-					,'Kayaking':1
-					,'Krav Maga': 1.5
-					,'Beach Volleyball': 1.1
-					,'Ultimate Frisbee':1
-					,'Wrestling': 0.9
-					,'Street Hockey':1
-					,'Roller Derby':1
-					,'Ping-Pong':1
-					,'Roller Skating':1
-					,'Badminton':1
-					,'Surfing':1
-					,'Ice Skating':1
-					,'Lacrosse':1
-					,'Horseback Riding':1
-					,'Fencing':1
-					,'Water Polo':1
-					,'Field Hockey':1
-					,'Frisbee': 0.75
-					,'Broomball':1
-					,'Hand Ball':1
-					,'Basketball':1.5
+					'Mountain Biking': 2.1
+					,'Competitive Rowing': 2
+					,'Kickboxing': 2.5
+					,'Soccer': 2
+					,'Brazilian Jiu-Jitsu': 2.1
+					,'Tennis': 2.4
+					,'Swimming': 2.1
+					,'Volleyball': 1.8
+					,'Ice Hockey': 2.2
+					,'Rock Climbing': 1.8
+					,'Racquetball': 2
+					,'Golf': 1.2
+					,'Squash': 2
+					,'Rugby': 2
+					,'Softball': 1.5
+					,'Taekwondo': 1.3
+					,'Baseball': 1.5
+					,'American Football': 1.9
+					,'Snowboarding': 1.7
+					,'Kayaking': 2
+					,'Krav Maga': 2.3
+					,'Beach Volleyball': 1.9
+					,'Ultimate Frisbee': 2
+					,'Wrestling': 2
+					,'Street Hockey':2
+					,'Roller Derby': 1.7
+					,'Ping-Pong': 1.5
+					,'Roller Skating': 1.7
+					,'Badminton': 2
+					,'Surfing': 2.3
+					,'Ice Skating': 1.7
+					,'Lacrosse': 2
+					,'Horseback Riding': 1.2
+					,'Fencing': 1.5
+					,'Water Polo': 2
+					,'Field Hockey': 2
+					,'Frisbee': 1.3
+					,'Broomball': 1.6
+					,'Hand Ball': 2
+					,'Basketball': 2
 
 						}
 
