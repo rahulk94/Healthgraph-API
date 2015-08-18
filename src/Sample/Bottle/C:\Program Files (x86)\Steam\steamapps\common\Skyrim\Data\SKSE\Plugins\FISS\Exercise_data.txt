@@ -8,14 +8,15 @@
 
 <sport_exercise 1> <type> Soccer </type> <points> 64 </points> <start_time> 2015-04-27 00:00:00 </start_time> </sport_exercise 1>
 
-<strength_exercise 1> <type> Sumo Deadlift </type> <points> 9 </points> <start_time> 2015-08-18 00:18:06 </start_time> </strength_exercise 1>
-<strength_exercise 2> <type> Tuck Jump </type> <points> 12 </points> <start_time> 2015-08-17 21:47:56 </start_time> </strength_exercise 2>
-<strength_exercise 3> <type> Burpee </type> <points> 47 </points> <start_time> 2015-08-17 21:42:10 </start_time> </strength_exercise 3>
-<strength_exercise 4> <type> Bench Dip </type> <points> 62 </points> <start_time> 2015-08-17 20:57:42 </start_time> </strength_exercise 4>
-<strength_exercise 5> <type> Squat </type> <points> 83 </points> <start_time> 2015-08-13 07:51:41 </start_time> </strength_exercise 5>
-<strength_exercise 6> <type> Sprint </type> <points> 5 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 6>
-<strength_exercise 7> <type> Straight-Leg Deadlift </type> <points> 24 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 7>
-<strength_exercise 8> <type> Deadlift </type> <points> 24 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 8>
+<strength_exercise 1> <type> Shrug </type> <points> 16 </points> <start_time> 2015-08-18 01:13:58 </start_time> </strength_exercise 1>
+<strength_exercise 2> <type> Sumo Deadlift </type> <points> 9 </points> <start_time> 2015-08-18 00:18:06 </start_time> </strength_exercise 2>
+<strength_exercise 3> <type> Tuck Jump </type> <points> 12 </points> <start_time> 2015-08-17 21:47:56 </start_time> </strength_exercise 3>
+<strength_exercise 4> <type> Burpee </type> <points> 47 </points> <start_time> 2015-08-17 21:42:10 </start_time> </strength_exercise 4>
+<strength_exercise 5> <type> Bench Dip </type> <points> 62 </points> <start_time> 2015-08-17 20:57:42 </start_time> </strength_exercise 5>
+<strength_exercise 6> <type> Squat </type> <points> 83 </points> <start_time> 2015-08-13 07:51:41 </start_time> </strength_exercise 6>
+<strength_exercise 7> <type> Sprint </type> <points> 5 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 7>
+<strength_exercise 8> <type> Straight-Leg Deadlift </type> <points> 24 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 8>
+<strength_exercise 9> <type> Deadlift </type> <points> 24 </points> <start_time> 2015-04-27 04:00:00 </start_time> </strength_exercise 9>
 
 </Data>
 </fiss>

@@ -111,7 +111,7 @@ class Points:
 
 
 
-	#pass this an activity feed item and it will return points, it will iterate through exercies if it is a strength feed item
+	#pass this an activity feed item and it will return points, it will iterate through exercises if it is a strength feed item
 	def get_points(self, feed):
 		activity = get_activity_type(feed)
 
@@ -156,10 +156,18 @@ class Points:
 				if weight == 0:
 					weight = self.bodyweight*0.4
 					
+				#weight modifier for stupid shrugs	
+				if "shrug" in get_exer_name(feed).lower():
+					weight = weight/11
+					
 				reps = get_reps(ex_set)
-				print(reps)
 				tonnage += weight * reps
 				points = int(round(tonnage/29))
+				
+				#weight modifier for dumbbell exercises
+				if "dumbbell" in get_exer_name(feed).lower():
+					weight = weight*2
+				
 				
 				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
