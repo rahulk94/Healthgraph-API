@@ -3,7 +3,6 @@ import HealthGraphPackage
 class Points:
 
 	activity_database = {	
-
 					#sports activities
 					'Mountain Biking': 2.1
 					,'Competitive Rowing': 2
@@ -76,54 +75,34 @@ class Points:
 
 						}
 
-	
-
-
 	def __init__(self, fitness_iterator, strength_iterator, weight_iterator):
 		self.fitness_activity_iter = fitness_iterator
 		self.strength_activity_iter = strength_iterator
 		self.bodyweight = get_bodyweight(weight_iterator.next())
 		
-		
-
-	def test_method(self):
-		print("jak is gay")
-
 	def get_total_points(self):
 		total_points = 0
 		
 		for feed_item in self.fitness_activity_iter:
-			
 			# print(get_start_time(feed_item))
 			exercise_points = self.get_points(feed_item)
 			total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
-
-			
 			#may need to do a check here for date before adding points of a feed
 			exercise_points = self.get_points(feed_item)
 # 			print (exercise_points)
 			total_points += exercise_points
 		
-
 		return total_points
-
-
 
 	#pass this an activity feed item and it will return points, it will iterate through exercises if it is a strength feed item
 	def get_points(self, feed):
 		activity = get_activity_type(feed)
-
 		exercise_type = get_type(feed)
-		
-		
-		
 
 		if activity == "FitnessActivity":
-
 			duration = feed.get("duration")/60
-
 			if exercise_type == "Other":
 				#sport activity
 				sport_act = feed.get_activity_detail()
@@ -133,9 +112,7 @@ class Points:
 				return points
 			else:
 				#cardio
-				
 				try:
-				
 					points = self.activity_database[exercise_type] * duration
 					print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 					return points
@@ -149,7 +126,6 @@ class Points:
 			info_set = get_exercise_set(str_act)
 # 			print(str_act.get('exercises'))
 			for ex_set in info_set:
-				
 				weight = get_weight(ex_set)
 				
 				#adjusting for bodyweight exercises
@@ -167,17 +143,12 @@ class Points:
 				#weight modifier for dumbbell exercises
 				if "dumbbell" in get_exer_name(feed).lower():
 					weight = weight*2
-				
-				
 				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
 			return points
 
-
 		return 0
-	
-	
-	
+
 
 #WRAPPER METHODS FOR DICTIONARY INFO RETRIEVAL	
 def get_exercise_type(act):
@@ -202,7 +173,6 @@ def get_exer_name(feed_item):
 	elif get_activity_type(feed_item) == 'StrengthActivity':
 		str_act = feed_item.get_activity_detail()
 		return get_secondary_type(str_act.get('exercises')[0])
-
 
 #returning the list of the sets of a particular strength exercise
 def get_exercise_set(str_act):

@@ -7,10 +7,7 @@ and client_secret. The client_id and client_secret is generated upon registratio
 in the Applications Portal of Health Graph (http://runkeeper.com/partner).
 
 Running the demo: python runkeeper_demo.py
-
-Point the web browser to the following URL: http://127.0.0.1:8000
-
-"""
+Point the web browser to the following URL: http://127.0.0.1:8000 """
 
 import sys
 import os
@@ -67,7 +64,8 @@ def index():
         rk_button_img = rk_auth_mgr.get_login_button_url('blue', 'black', 300)
         return bottle.template('index.html', {'rk_button_img': rk_button_img,
                                               'rk_auth_uri': rk_auth_uri,})
-        
+
+
 @bottle.route('/login')
 def login():
     sess = bottle.request.environ['beaker.session']
@@ -80,27 +78,26 @@ def login():
         sess.save()
         bottle.redirect('/welcome')
         
+
 @bottle.route('/welcome')
 def welcome():
     sess = bottle.request.environ['beaker.session']
-    access_token = sess.get('rk_access_token'
-                            )
+    access_token = sess.get('rk_access_token')
+    
     if access_token is not None:
         user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
         profile = user.get_profile()
         records = user.get_records()
-        
+
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
         weight_iter = user.get_weight_measurement_iter()
         
         points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter,weight_iter)
+        write_to_file(user, points)
+        
 #         total_points = points.get_total_points()
 #         print("Total points for the past week was: " + str(total_points))
-
-        write_to_file(user, points)
-
-        print("Write to file complete")
 
         activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
@@ -111,22 +108,22 @@ def welcome():
         bottle.redirect('/')
 
 
-def write_to_file(userToken, points):
-    
+def write_to_file(userToken, points):    
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
     file_name = "Exercise_data.txt"
+    
     previous_import_date = ""
     if os.path.isfile(path_to_FISS + file_name):
-        #TODO
+        #TODO Read in only files later than the previous import date
         read_file = open(path_to_FISS + file_name)
         for i, line in enumerate(read_file):
             if i == 3:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:29]
         read_file.close()
-
-
+        
+    print("Date = " + previous_import_date)
     output_file = open(path_to_FISS + file_name, "w")
 
     output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
@@ -134,69 +131,59 @@ def write_to_file(userToken, points):
     output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
     #Format each exercise and add it to file
-    i = 1
+    #May want to create method to format strings as it's mostly boilerplate code
+    index = 1
     fitness_act_iter = userToken.get_fitness_activity_iter()
+    sport_exercises = []
     for exercise in fitness_act_iter:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        
         if HealthGraphPackage.Points.get_type(exercise) != 'Other':
-            fitness_exercise = "<fitness_exercise " + str(i) + "> "
+            fitness_exercise = "<fitness_exercise " + str(index) + "> "
             fitness_exercise += "<type> " + exercise_type + " </type> "
             fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
             fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</fitness_exercise " + str(i) + ">"
-            
+            fitness_exercise += "</fitness_exercise " + str(index) + ">"
             output_file.write(fitness_exercise + "\n")
-            i = i + 1
- 
+            index += 1
+        else:
+            sport_exercises.append(exercise)
     output_file.write("\n")
     
-    
-    i = 1
-    fitness_act_iter = userToken.get_fitness_activity_iter()
-    for exercise in fitness_act_iter:
+    index = 1
+    for exercise in sport_exercises:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        
-        if HealthGraphPackage.Points.get_type(exercise) == 'Other':
-            fitness_exercise = "<sport_exercise " + str(i) + "> "
-            fitness_exercise += "<type> " + exercise_type + " </type> "
-            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</sport_exercise " + str(i) + ">"
-            
-            output_file.write(fitness_exercise + "\n")
-            i = i + 1
- 
+        sport_exercise = "<sport_exercise " + str(index) + "> "
+        sport_exercise += "<type> " + exercise_type + " </type> "
+        sport_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+        sport_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        sport_exercise += "</sport_exercise " + str(index) + ">"
+        output_file.write(sport_exercise + "\n")
+        index += 1
     output_file.write("\n")
     
-    
-    
-    
-    
- 
-    i = 1
+    index = 1
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        
-        strength_exercise = "<strength_exercise " + str(i) + "> "
+        strength_exercise = "<strength_exercise " + str(index) + "> "
         strength_exercise += "<type> " + exercise_type + " </type> "
         strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
         strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-        strength_exercise += "</strength_exercise " + str(i) + ">"
-
+        strength_exercise += "</strength_exercise " + str(index) + ">"
         output_file.write(strength_exercise + "\n")
-        i = i + 1
- 
+        index += 1
     output_file.write("\n</Data>\n</fiss>")
  
     output_file.close()
+    print("Write to file method complete")
+
 
 @bottle.route('/logout')
 def logout():
     sess = bottle.request.environ['beaker.session']
     sess.delete()
     bottle.redirect('/')
+    
     
 @bottle.route('/view_access_token')
 def view_access_token():
@@ -212,8 +199,6 @@ def view_access_token():
     else:
         bottle.redirect('/')
     
-
-
 
 def parse_cmdline(argv=None):
     """Parse command line options.
