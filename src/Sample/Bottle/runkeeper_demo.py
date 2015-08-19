@@ -12,6 +12,7 @@ Point the web browser to the following URL: http://127.0.0.1:8000 """
 import sys
 import os
 import time
+from datetime import datetime, date
 import optparse
 import ConfigParser
 import bottle
@@ -120,14 +121,19 @@ def write_to_file(userToken, points):
         for i, line in enumerate(read_file):
             if i == 3:
                 previous_import_date = line
-                previous_import_date = previous_import_date[19:29]
+                previous_import_date = previous_import_date[19:27]
         read_file.close()
         
-    print("Date = " + previous_import_date)
+#     If no previous import date found, import exercises from the first of this month
+#     Else use what is in the file
+    previous_import_date_object = date(date.today().year, date.today().month, 1)
+    if previous_import_date != "":
+        previous_import_date_object = datetime.strptime(previous_import_date, '%d%m%Y').date()
+        
     output_file = open(path_to_FISS + file_name, "w")
 
     output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
-    todays_date = time.strftime("%d/%m/%Y")
+    todays_date = time.strftime("%d%m%Y")
     output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
     #Format each exercise and add it to file
@@ -136,17 +142,20 @@ def write_to_file(userToken, points):
     fitness_act_iter = userToken.get_fitness_activity_iter()
     sport_exercises = []
     for exercise in fitness_act_iter:
-        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        if HealthGraphPackage.Points.get_type(exercise) != 'Other':
-            fitness_exercise = "<fitness_exercise " + str(index) + "> "
-            fitness_exercise += "<type> " + exercise_type + " </type> "
-            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</fitness_exercise " + str(index) + ">"
-            output_file.write(fitness_exercise + "\n")
-            index += 1
-        else:
-            sport_exercises.append(exercise)
+        exercise_date = exercise.get("start_time").date()
+        if previous_import_date_object <= exercise_date:
+            exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+        
+            if HealthGraphPackage.Points.get_type(exercise) != 'Other':
+                fitness_exercise = "<fitness_exercise " + str(index) + "> "
+                fitness_exercise += "<type> " + exercise_type + " </type> "
+                fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+                fitness_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
+                fitness_exercise += "</fitness_exercise " + str(index) + ">"
+                output_file.write(fitness_exercise + "\n")
+                index += 1
+            else:
+                sport_exercises.append(exercise)
     output_file.write("\n")
     
     index = 1
@@ -155,7 +164,7 @@ def write_to_file(userToken, points):
         sport_exercise = "<sport_exercise " + str(index) + "> "
         sport_exercise += "<type> " + exercise_type + " </type> "
         sport_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        sport_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
+        sport_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
         sport_exercise += "</sport_exercise " + str(index) + ">"
         output_file.write(sport_exercise + "\n")
         index += 1
@@ -164,16 +173,18 @@ def write_to_file(userToken, points):
     index = 1
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
-        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        strength_exercise = "<strength_exercise " + str(index) + "> "
-        strength_exercise += "<type> " + exercise_type + " </type> "
-        strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-        strength_exercise += "</strength_exercise " + str(index) + ">"
-        output_file.write(strength_exercise + "\n")
-        index += 1
+        exercise_date = exercise.get("start_time").date()
+        if previous_import_date_object <= exercise_date:
+            exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+            strength_exercise = "<strength_exercise " + str(index) + "> "
+            strength_exercise += "<type> " + exercise_type + " </type> "
+            strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+            strength_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
+            strength_exercise += "</strength_exercise " + str(index) + ">"
+            output_file.write(strength_exercise + "\n")
+            index += 1
+            
     output_file.write("\n</Data>\n</fiss>")
- 
     output_file.close()
     print("Write to file method complete")
 

@@ -147,6 +147,7 @@ class Points:
 				
 			return points
 
+		print("No points calculated")
 		return 0
 
 
