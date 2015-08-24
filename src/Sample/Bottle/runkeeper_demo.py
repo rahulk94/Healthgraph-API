@@ -12,13 +12,14 @@ Point the web browser to the following URL: http://127.0.0.1:8000 """
 import sys
 import os
 import time
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import optparse
 import ConfigParser
 import bottle
 import HealthGraphPackage
 import HealthGraphPackage.Points
 from beaker.middleware import SessionMiddleware
+from Canvas import Line
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2012, Ali Onur Uyar"
@@ -114,15 +115,29 @@ def write_to_file(userToken, points):
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
     file_name = "Exercise_data.txt"
     
+    first_import_date = ""
     previous_import_date = ""
+    first_weeks_points = 0
+    first_date = datetime.today()
+    
+    file_to_read = []
+
     if os.path.isfile(path_to_FISS + file_name):
         #TODO Read in only files later than the previous import date
         read_file = open(path_to_FISS + file_name)
         for i, line in enumerate(read_file):
             if i == 3:
+                first_date = line
+                first_date_in_format = first_date[20:24] + first_date[26:28]
+                first_date = datetime.strptime(first_date_in_format, "%d%m%y")
+                first_import_date = "" +  str('%02d' %first_date.day) + str('%02d' %first_date.month) + str(first_date.year)
+            if i == 4:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:27]
         read_file.close()
+    else:
+        first_date = datetime.today()
+        first_import_date = time.strftime("%d%m%Y")
         
 #     If no previous import date found, import exercises from the first of this month
 #     Else use what is in the file
@@ -130,12 +145,15 @@ def write_to_file(userToken, points):
     if previous_import_date != "":
         previous_import_date_object = datetime.strptime(previous_import_date, '%d%m%Y').date()
         
-    output_file = open(path_to_FISS + file_name, "w")
+    output_file = open(path_to_FISS + "temp.txt", "w")
 
     output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
     todays_date = time.strftime("%d%m%Y")
+    output_file.write("<First_import_date> " + first_import_date + " </First_import_date> \n")
     output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
+    one_week_from_first_import = (first_date + timedelta(days = 7)).date()
+    
     #Format each exercise and add it to file
     #May want to create method to format strings as it's mostly boilerplate code
     index = 1
@@ -143,13 +161,18 @@ def write_to_file(userToken, points):
     sport_exercises = []
     for exercise in fitness_act_iter:
         exercise_date = exercise.get("start_time").date()
+        
         if previous_import_date_object <= exercise_date:
             exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        
+                
+            exercise_points = points.get_points(exercise)
+            if exercise_date <= one_week_from_first_import:
+                first_weeks_points += exercise_points    
+                
             if HealthGraphPackage.Points.get_type(exercise) != 'Other':
                 fitness_exercise = "<fitness_exercise " + str(index) + "> "
                 fitness_exercise += "<type> " + exercise_type + " </type> "
-                fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+                fitness_exercise += "<points> " + str(exercise_points) + " </points> "
                 fitness_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
                 fitness_exercise += "</fitness_exercise " + str(index) + ">"
                 output_file.write(fitness_exercise + "\n")
@@ -161,9 +184,14 @@ def write_to_file(userToken, points):
     index = 1
     for exercise in sport_exercises:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+        
+        exercise_points = points.get_points(exercise)
+        if exercise_date <= one_week_from_first_import:
+            first_weeks_points += exercise_points
+
         sport_exercise = "<sport_exercise " + str(index) + "> "
         sport_exercise += "<type> " + exercise_type + " </type> "
-        sport_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+        sport_exercise += "<points> " + str(exercise_points) + " </points> "
         sport_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
         sport_exercise += "</sport_exercise " + str(index) + ">"
         output_file.write(sport_exercise + "\n")
@@ -174,20 +202,42 @@ def write_to_file(userToken, points):
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
         exercise_date = exercise.get("start_time").date()
+        
         if previous_import_date_object <= exercise_date:
             exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+            
+            exercise_points = points.get_points(exercise)
+            if exercise_date <= one_week_from_first_import:
+                first_weeks_points += exercise_points
+            
             strength_exercise = "<strength_exercise " + str(index) + "> "
             strength_exercise += "<type> " + exercise_type + " </type> "
-            strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
+            strength_exercise += "<points> " + str(exercise_points) + " </points> "
             strength_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
             strength_exercise += "</strength_exercise " + str(index) + ">"
             output_file.write(strength_exercise + "\n")
             index += 1
-            
+    
+    output_file.write("\n")
+    output_file.write("<First week points> " + str(first_weeks_points) + " </First week points>")
+    output_file.write("\n")
     output_file.write("\n</Data>\n</fiss>")
     output_file.close()
-    print("Write to file method complete")
+    
+    read_file = open(path_to_FISS + "temp.txt", "r") 
+    write_file = open(path_to_FISS + file_name, "w")
 
+    for line in read_file:
+        if "<Last_update_data>" in line:
+            write_file.write(line)
+            write_file.write("<First week points> " + str(first_weeks_points) + " </First week points>\n")
+        else:
+            write_file.write(line)
+    read_file.close()
+    write_file.close()
+    
+    print("Write to file method complete")
+    
 
 @bottle.route('/logout')
 def logout():
