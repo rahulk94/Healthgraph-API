@@ -1,0 +1,19 @@
+<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>
+<Data>
+
+<First_import_date> 24082015 </First_import_date> 
+<First week points> 64 </First week points>
+<Last_update_data> 24082015 </Last_update_data> 
+
+<fitness_exercise 1> <type> Running </type> <points> 0 </points> <start_time> 2015-08-14 </start_time> </fitness_exercise 1>
+
+
+<strength_exercise 1> <type> Deadlift </type> <points> 2 </points> <start_time> 2015-08-14 </start_time> </strength_exercise 1>
+<strength_exercise 2> <type> Bench Press </type> <points> 0 </points> <start_time> 2015-08-14 </start_time> </strength_exercise 2>
+<strength_exercise 3> <type> Floor Dumbbell Calf Raise </type> <points> 10 </points> <start_time> 2015-08-14 </start_time> </strength_exercise 3>
+<strength_exercise 4> <type> Bench Press </type> <points> 52 </points> <start_time> 2015-08-02 </start_time> </strength_exercise 4>
+
+
+
+</Data>
+</fiss>

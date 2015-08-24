@@ -120,7 +120,7 @@ def write_to_file(userToken, points):
     first_weeks_points = 0
     first_date = datetime.today()
     
-    file_to_read = []
+    file_to_write = []
 
     if os.path.isfile(path_to_FISS + file_name):
         #TODO Read in only files later than the previous import date
@@ -130,7 +130,7 @@ def write_to_file(userToken, points):
                 first_date = line
                 first_date_in_format = first_date[20:24] + first_date[26:28]
                 first_date = datetime.strptime(first_date_in_format, "%d%m%y")
-                first_import_date = "" +  str('%02d' %first_date.day) + str('%02d' %first_date.month) + str(first_date.year)
+                first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
             if i == 4:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:27]
@@ -143,14 +143,12 @@ def write_to_file(userToken, points):
 #     Else use what is in the file
     previous_import_date_object = date(date.today().year, date.today().month, 1)
     if previous_import_date != "":
-        previous_import_date_object = datetime.strptime(previous_import_date, '%d%m%Y').date()
+        previous_import_date_object = datetime.strptime(previous_import_date, "%d%m%Y").date()
         
-    output_file = open(path_to_FISS + "temp.txt", "w")
-
-    output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
+    file_to_write.append("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
     todays_date = time.strftime("%d%m%Y")
-    output_file.write("<First_import_date> " + first_import_date + " </First_import_date> \n")
-    output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
+    file_to_write.append("<First_import_date> " + first_import_date + " </First_import_date> \n")
+    file_to_write.append("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
     one_week_from_first_import = (first_date + timedelta(days = 7)).date()
     
@@ -175,11 +173,11 @@ def write_to_file(userToken, points):
                 fitness_exercise += "<points> " + str(exercise_points) + " </points> "
                 fitness_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
                 fitness_exercise += "</fitness_exercise " + str(index) + ">"
-                output_file.write(fitness_exercise + "\n")
+                file_to_write.append(fitness_exercise + "\n")
                 index += 1
             else:
                 sport_exercises.append(exercise)
-    output_file.write("\n")
+    file_to_write.append("\n")
     
     index = 1
     for exercise in sport_exercises:
@@ -194,9 +192,9 @@ def write_to_file(userToken, points):
         sport_exercise += "<points> " + str(exercise_points) + " </points> "
         sport_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
         sport_exercise += "</sport_exercise " + str(index) + ">"
-        output_file.write(sport_exercise + "\n")
+        file_to_write.append(sport_exercise + "\n")
         index += 1
-    output_file.write("\n")
+    file_to_write.append("\n")
     
     index = 1
     strength_act_iter = userToken.get_strength_activity_iter()
@@ -215,26 +213,17 @@ def write_to_file(userToken, points):
             strength_exercise += "<points> " + str(exercise_points) + " </points> "
             strength_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
             strength_exercise += "</strength_exercise " + str(index) + ">"
-            output_file.write(strength_exercise + "\n")
+            file_to_write.append(strength_exercise + "\n")
             index += 1
     
-    output_file.write("\n")
-    output_file.write("<First week points> " + str(first_weeks_points) + " </First week points>")
-    output_file.write("\n")
-    output_file.write("\n</Data>\n</fiss>")
-    output_file.close()
+    file_to_write.append("\n")
+    file_to_write.insert(2, "<First week points> " + str(first_weeks_points) + " </First week points>\n")
+    file_to_write.append("\n")
+    file_to_write.append("\n</Data>\n</fiss>")
     
-    read_file = open(path_to_FISS + "temp.txt", "r") 
-    write_file = open(path_to_FISS + file_name, "w")
-
-    for line in read_file:
-        if "<Last_update_data>" in line:
-            write_file.write(line)
-            write_file.write("<First week points> " + str(first_weeks_points) + " </First week points>\n")
-        else:
-            write_file.write(line)
-    read_file.close()
-    write_file.close()
+    with open(path_to_FISS + file_name, "w") as fwrite:
+        for line in file_to_write:
+            fwrite.write(line)
     
     print("Write to file method complete")
     
