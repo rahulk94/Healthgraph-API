@@ -132,6 +132,11 @@ def write_to_file(userToken, points):
                 first_date = datetime.strptime(first_date_in_format, "%d%m%y")
                 first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
             if i == 4:
+                first_weeks_points_str = line
+                index = first_weeks_points_str.index("</First week points>") - 1
+                first_weeks_points_str = line[20:index]
+                first_weeks_points = int(first_weeks_points_str)
+            if i == 5:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:27]
         read_file.close()
