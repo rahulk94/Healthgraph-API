@@ -2,104 +2,123 @@ import HealthGraphPackage
 
 class Points:
 
-	sports = {	
-					'Mountain Biking': 1.1
-					,'Competitive Rowing': 1
-					,'Kickboxing': 1.5
-					,'Soccer': 1
-					,'Brazilian Jiu-Jitsu': 1.2
-					,'Tennis': 1.4
-					,'Swimming': 1.2
-					,'Volleyball': 0.9
-					,'Ice Hockey': 1.3
-					,'Rock Climbing': 0.9
-					,'Racquetball': 1
-					,'Golf': 0.7
-					,'Squash': 1
-					,'Taekwondo': 1
-					,'Baseball':1
-					,'American Football':1
-					,'Snowboarding':1
-					,'Kayaking':1
-					,'Krav Maga': 1.5
-					,'Beach Volleyball': 1.1
-					,'Ultimate Frisbee':1
-					,'Wrestling': 0.9
-					,'Street Hockey':1
-					,'Roller Derby':1
-					,'Ping-Pong':1
-					,'Roller Skating':1
-					,'Badminton':1
-					,'Surfing':1
-					,'Ice Skating':1
-					,'Lacrosse':1
-					,'Horseback Riding':1
-					,'Fencing':1
-					,'Water Polo':1
-					,'Field Hockey':1
-					,'Frisbee': 0.75
-					,'Broomball':1
-					,'Hand Ball':1
-					,'Basketball':1.5
+	activity_database = {	
+					#sports activities
+					'Mountain Biking': 2.1
+					,'Competitive Rowing': 2
+					,'Kickboxing': 2.5
+					,'Soccer': 2
+					,'Brazilian Jiu-Jitsu': 2.1
+					,'Tennis': 2.4
+					,'Swimming': 2.1
+					,'Volleyball': 1.8
+					,'Ice Hockey': 2.2
+					,'Rock Climbing': 1.8
+					,'Racquetball': 2
+					,'Golf': 1.2
+					,'Squash': 2
+					,'Rugby': 2
+					,'Softball': 1.5
+					,'Taekwondo': 1.3
+					,'Baseball': 1.5
+					,'American Football': 1.9
+					,'Snowboarding': 1.7
+					,'Skiiing': 1.7
+					,'Kayaking': 2
+					,'Krav Maga': 2.3
+					,'Beach Volleyball': 1.9
+					,'Ultimate Frisbee': 2
+					,'Wrestling': 2
+					,'Street Hockey':2
+					,'Roller Derby': 1.7
+					,'Ping-Pong': 1.5
+					,'Roller Skating': 1.7
+					,'Badminton': 2
+					,'Surfing': 2.3
+					,'Ice Skating': 1.7
+					,'Lacrosse': 2
+					,'Horseback Riding': 1.2
+					,'Fencing': 1.5
+					,'Water Polo': 2
+					,'Field Hockey': 2
+					,'Frisbee': 1.3
+					,'Broomball': 1.6
+					,'Hand Ball': 2
+					,'Basketball': 2
+
+					#cardio activities
+					,'Bicycling': 2
+					,'Running': 2
+					,'Jogging': 1.6
+					,'Walking': 1.4
+					, 'Elliptical Trainer': 1.7
+					, 'Treadmill Running': 1.9
+					, 'Treadmill Jogging': 1.6
+					, 'Treadmill Walking': 1.3
+					, 'Jump Rope': 2.5
+					, 'Hiking': 1.7
+					, 'Rowing': 2
+					, 'Sprint': 2.5
+					, 'Stair Climber': 1.7
+					, 'Treadmill Sprint': 2.3
+					, 'Zumba': 1.6
+					, 'Boxing': 2.5
+					, 'Skating': 1.4
+					, 'Sled Push': 2.5
+					, 'Power Walking': 1.5
+					, 'Exercise Bike': 1.6
+					, 'Sled Sprint': 2.5
+					, 'Hill Sprint': 2.5
+					, 'Shuttle Run': 2.4
+					, 'Keg Carry': 2.5
+					, 'Tire Pull': 2.5
 
 						}
 
-	cardio = {	'Cycling':2
-				,'Running':2
-			
-						}
-
-
-	def __init__(self, fitness_iterator, strength_iterator):
+	def __init__(self, fitness_iterator, strength_iterator, weight_iterator):
 		self.fitness_activity_iter = fitness_iterator
 		self.strength_activity_iter = strength_iterator
-
-	def test_method(self):
-		print("jak is gay")
-
+		self.bodyweight = get_bodyweight(weight_iterator.next())
+		
 	def get_total_points(self):
 		total_points = 0
 		
 		for feed_item in self.fitness_activity_iter:
-			
-			print(get_start_time(feed_item))
+			# print(get_start_time(feed_item))
 			exercise_points = self.get_points(feed_item)
 			total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
-
-			
 			#may need to do a check here for date before adding points of a feed
 			exercise_points = self.get_points(feed_item)
 # 			print (exercise_points)
 			total_points += exercise_points
 		
-
 		return total_points
 
-
-
-	#pass this an activity feed item and it will return points, it will iterate through exercies if it is a strength feed item
+	#pass this an activity feed item and it will return points, it will iterate through exercises if it is a strength feed item
 	def get_points(self, feed):
 		activity = get_activity_type(feed)
-
 		exercise_type = get_type(feed)
-		
 
 		if activity == "FitnessActivity":
-
 			duration = feed.get("duration")/60
-
 			if exercise_type == "Other":
+				#sport activity
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
-				points = self.sports[sport_type] * duration
-# 				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+				points = self.activity_database[sport_type] * duration
+				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
-				points = self.cardio[exercise_type] * duration
-				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
-				return points
+				#cardio
+				try:
+					points = self.activity_database[exercise_type] * duration
+					print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+					return points
+				except:
+					return 0
+			
 		elif activity == "StrengthActivity":
 			#Get type of exercise
 			tonnage = 0
@@ -108,29 +127,29 @@ class Points:
 # 			print(str_act.get('exercises'))
 			for ex_set in info_set:
 				weight = get_weight(ex_set)
-				reps = get_weight(ex_set)
+				
+				#adjusting for bodyweight exercises
+				if weight == 0:
+					weight = self.bodyweight*0.4
+					
+				#weight modifier for stupid shrugs	
+				if "shrug" in get_exer_name(feed).lower():
+					weight = weight/11
+					
+				reps = get_reps(ex_set)
 				tonnage += weight * reps
+				points = int(round(tonnage/29))
 				
-				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(weight * reps))
+				#weight modifier for dumbbell exercises
+				if "dumbbell" in get_exer_name(feed).lower():
+					weight = weight*2
+				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
-			return int(round(tonnage))
+			return points
 
-	
-
-		# else if activity.getType() == strength Activity:
-		# 	#do shit
-
-		# 	weight = activity.getWeight()
-		# 	reps = activity.getReps()
-		# 	sets = activity.getSets()
-		# 	tonnage = weight * sets * reps
-
-		# 	return tonnage/100
-
+		print("No points calculated")
 		return 0
-	
-	
-	
+
 
 #WRAPPER METHODS FOR DICTIONARY INFO RETRIEVAL	
 def get_exercise_type(act):
@@ -156,7 +175,6 @@ def get_exer_name(feed_item):
 		str_act = feed_item.get_activity_detail()
 		return get_secondary_type(str_act.get('exercises')[0])
 
-
 #returning the list of the sets of a particular strength exercise
 def get_exercise_set(str_act):
 	return str_act.get('exercises')[0].get('sets')
@@ -173,5 +191,8 @@ def get_activity_type(feed_item):
 	
 def get_start_time(act):
 	return act.get("start_time")
+
+def get_bodyweight(user):
+	return user.get("weight")
 	
 	

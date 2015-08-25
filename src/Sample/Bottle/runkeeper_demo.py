@@ -7,22 +7,21 @@ and client_secret. The client_id and client_secret is generated upon registratio
 in the Applications Portal of Health Graph (http://runkeeper.com/partner).
 
 Running the demo: python runkeeper_demo.py
-
-Point the web browser to the following URL: http://127.0.0.1:8000
-
-"""
+Point the web browser to the following URL: http://127.0.0.1:8000 """
 
 import sys
 import signal
 import os
 import subprocess
 import time
+from datetime import datetime, date, timedelta
 import optparse
 import ConfigParser
 import bottle
 import HealthGraphPackage
 import HealthGraphPackage.Points
 from beaker.middleware import SessionMiddleware
+from Canvas import Line
 
 __author__ = "Ali Onur Uyar"
 __copyright__ = "Copyright 2012, Ali Onur Uyar"
@@ -69,7 +68,8 @@ def index():
         rk_button_img = rk_auth_mgr.get_login_button_url('blue', 'black', 300)
         return bottle.template('index.html', {'rk_button_img': rk_button_img,
                                               'rk_auth_uri': rk_auth_uri,})
-        
+
+
 @bottle.route('/login')
 def login():
     sess = bottle.request.environ['beaker.session']
@@ -82,26 +82,26 @@ def login():
         sess.save()
         bottle.redirect('/welcome')
         
+
 @bottle.route('/welcome')
 def welcome():
     sess = bottle.request.environ['beaker.session']
-    access_token = sess.get('rk_access_token'
-                            )
+    access_token = sess.get('rk_access_token')
+    
     if access_token is not None:
         user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
         profile = user.get_profile()
         records = user.get_records()
-        
+
         act_iter = user.get_fitness_activity_iter()
         strength_act_iter = user.get_strength_activity_iter()
+        weight_iter = user.get_weight_measurement_iter()
         
-        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter)
-        # total_points = points.get_total_points()
-        # print("Total points for the past week was: " + str(total_points))
-
+        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter,weight_iter)
         write_to_file(user, points)
-
-        print("Write to file complete")
+        
+#         total_points = points.get_total_points()
+#         print("Total points for the past week was: " + str(total_points))
 
         activities = [act_iter.next() for _ in range(1)] 
         return bottle.template('welcome.html', 
@@ -112,82 +112,129 @@ def welcome():
         bottle.redirect('/')
 
 
-def write_to_file(userToken, points):
-    
+def write_to_file(userToken, points):    
     #Overwrites myFile.txt if it exists cause of w flag. Creates if it does not
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
     file_name = "Exercise_data.txt"
+    
+    first_import_date = ""
     previous_import_date = ""
+    first_weeks_points = 0
+    first_date = datetime.today()
+    
+    file_to_write = []
+
     if os.path.isfile(path_to_FISS + file_name):
-        #TODO
         read_file = open(path_to_FISS + file_name)
         for i, line in enumerate(read_file):
             if i == 3:
+                first_date = line
+                first_date_in_format = first_date[20:24] + first_date[26:28]
+                first_date = datetime.strptime(first_date_in_format, "%d%m%y")
+                first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
+            if i == 4:
+                first_weeks_points_str = line
+                index = first_weeks_points_str.index("</First week points>") - 1
+                first_weeks_points_str = line[20:index]
+                first_weeks_points = int(first_weeks_points_str)
+            if i == 5:
                 previous_import_date = line
-                previous_import_date = previous_import_date[19:29]
+                previous_import_date = previous_import_date[19:27]
         read_file.close()
+    else:
+        first_date = datetime.today()
+        first_import_date = time.strftime("%d%m%Y")
+        
+#     If no previous import date found, import exercises from the first of this month
+#     Else use what is in the file
+    previous_import_date_object = date(date.today().year, date.today().month, 1)
+    if previous_import_date != "":
+        previous_import_date_object = datetime.strptime(previous_import_date, "%d%m%Y").date()
+        
+    file_to_write.append("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
+    todays_date = time.strftime("%d%m%Y")
+    file_to_write.append("<First_import_date> " + first_import_date + " </First_import_date> \n")
+    file_to_write.append("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
-
-    output_file = open(path_to_FISS + file_name, "w")
-
-    output_file.write("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
-    todays_date = time.strftime("%d/%m/%Y")
-    output_file.write("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
-
+    one_week_from_first_import = (first_date + timedelta(days = 7)).date()
+    first_week_completed = datetime.now().date() > one_week_from_first_import
+    file_to_write.append("<First_week_completed> " + str(first_week_completed) + " </First_week_completed> \n\n")
+    
     #Format each exercise and add it to file
-    i = 1
+    #May want to create method to format strings as it's mostly boilerplate code
+    index = 1
     fitness_act_iter = userToken.get_fitness_activity_iter()
+    sport_exercises = []
     for exercise in fitness_act_iter:
+        exercise_date = exercise.get("start_time").date()
+        
+        if previous_import_date_object <= exercise_date:
+            exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+                
+            exercise_points = points.get_points(exercise)
+            if exercise_date <= one_week_from_first_import:
+                first_weeks_points += exercise_points    
+                
+            if HealthGraphPackage.Points.get_type(exercise) != 'Other':
+                fitness_exercise = "<fitness_exercise " + str(index) + "> "
+                fitness_exercise += "<type> " + exercise_type + " </type> "
+                fitness_exercise += "<points> " + str(exercise_points) + " </points> "
+                fitness_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
+                fitness_exercise += "</fitness_exercise " + str(index) + ">"
+                file_to_write.append(fitness_exercise + "\n")
+                index += 1
+            else:
+                sport_exercises.append(exercise)
+    file_to_write.append("\n")
+    
+    index = 1
+    for exercise in sport_exercises:
         exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
         
-        if HealthGraphPackage.Points.get_type(exercise) != 'Other':
-            fitness_exercise = "<fitness_exercise " + str(i) + "> "
-            fitness_exercise += "<type> " + exercise_type + " </type> "
-            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</fitness_exercise " + str(i) + ">"
-            
-            output_file.write(fitness_exercise + "\n")
-            i = i + 1
- 
-    output_file.write("\n")
+        exercise_points = points.get_points(exercise)
+        if exercise_date <= one_week_from_first_import:
+            first_weeks_points += exercise_points
+
+        sport_exercise = "<sport_exercise " + str(index) + "> "
+        sport_exercise += "<type> " + exercise_type + " </type> "
+        sport_exercise += "<points> " + str(exercise_points) + " </points> "
+        sport_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
+        sport_exercise += "</sport_exercise " + str(index) + ">"
+        file_to_write.append(sport_exercise + "\n")
+        index += 1
+    file_to_write.append("\n")
     
-    
-    i = 1
-    fitness_act_iter = userToken.get_fitness_activity_iter()
-    for exercise in fitness_act_iter:
-        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
-        
-        if HealthGraphPackage.Points.get_type(exercise) == 'Other':
-            fitness_exercise = "<sport_exercise " + str(i) + "> "
-            fitness_exercise += "<type> " + exercise_type + " </type> "
-            fitness_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-            fitness_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-            fitness_exercise += "</sport_exercise " + str(i) + ">"
-            
-            output_file.write(fitness_exercise + "\n")
-            i = i + 1
- 
-    output_file.write("\n")
-        
- 
-    i = 1
+    index = 1
     strength_act_iter = userToken.get_strength_activity_iter()
     for exercise in strength_act_iter:
-        exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+        exercise_date = exercise.get("start_time").date()
         
-        strength_exercise = "<strength_exercise " + str(i) + "> "
-        strength_exercise += "<type> " + exercise_type + " </type> "
-        strength_exercise += "<points> " + str(points.get_points(exercise)) + " </points> "
-        strength_exercise += "<start_time> " + str(exercise.get("start_time")) + " </start_time> "
-        strength_exercise += "</strength_exercise " + str(i) + ">"
-
-        output_file.write(strength_exercise + "\n")
-        i = i + 1
- 
-    output_file.write("\n</Data>\n</fiss>")
- 
-    output_file.close()
+        if previous_import_date_object <= exercise_date:
+            exercise_type = HealthGraphPackage.Points.get_exer_name(exercise)
+            
+            exercise_points = points.get_points(exercise)
+            if exercise_date <= one_week_from_first_import:
+                first_weeks_points += exercise_points
+            
+            strength_exercise = "<strength_exercise " + str(index) + "> "
+            strength_exercise += "<type> " + exercise_type + " </type> "
+            strength_exercise += "<points> " + str(exercise_points) + " </points> "
+            strength_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
+            strength_exercise += "</strength_exercise " + str(index) + ">"
+            file_to_write.append(strength_exercise + "\n")
+            index += 1
+    
+    file_to_write.append("\n")
+    file_to_write.insert(2, "<First week points> " + str(first_weeks_points) + " </First week points>\n")
+    file_to_write.append("\n")
+    file_to_write.append("\n</Data>\n</fiss>")
+    
+    with open(path_to_FISS + file_name, "w") as fwrite:
+        for line in file_to_write:
+            fwrite.write(line)
+    
+    print("Write to file method complete")
+    
 
 @bottle.route('/logout')
 def logout():
@@ -198,7 +245,6 @@ def logout():
     bottle.redirect('/')
 
 
-    
 @bottle.route('/view_access_token')
 def view_access_token():
     sess = bottle.request.environ['beaker.session']
@@ -213,8 +259,6 @@ def view_access_token():
     else:
         bottle.redirect('/')
     
-
-
 
 def parse_cmdline(argv=None):
     """Parse command line options.

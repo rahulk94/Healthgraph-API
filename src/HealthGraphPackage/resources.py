@@ -358,17 +358,6 @@ class User(Resource):
                                          mod_date_min=mod_date_min,
                                          mod_date_max=mod_date_max,
                                          descending=descending)
-    #jak
-    # def get_indi_str_activity_iter(self,
-    #                                date_min=None, date_max=None, 
-    #                                mod_date_min=None, mod_date_max=None,
-    #                                descending=True, strength_feed_iter):
-    #     return self._get_linked_resource(self._prop_dict['strength_training_activities'],
-    #                                      date_min=date_min, 
-    #                                      date_max=date_max,
-    #                                      mod_date_min=mod_date_min,
-    #                                      mod_date_max=mod_date_max,
-    #                                      descending=descending)
 
 
 
@@ -716,7 +705,7 @@ class StrengthActivity(Resource):
 
     #getting reps from dictionary
     def get_reps(self):
-      return self._prop_defs.get('exercises').get('repetitions')
+        return self._prop_defs.get('exercises').get('repetitions')
 
     def get_comment_thread(self):
         return self._get_linked_resource(self._prop_dict['comments'])
@@ -759,7 +748,7 @@ class WeightMeasurementFeedItem(FeedItem):
                   'fat_percent': float,
                   'mass_weight': float,
                   'bmi': float}
-    _prop_main = ('timestamp',)
+    _prop_main = ('timestamp', 'weight')
 
     def __init__(self, data, session=None):
         super(WeightMeasurementFeedItem, self).__init__(data, session=session)
