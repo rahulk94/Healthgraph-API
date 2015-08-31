@@ -117,6 +117,7 @@ def write_to_file(userToken, points):
     first_import_date = ""
     previous_import_date = ""
     first_weeks_points = 0
+    first_weeks_points_not_found = True
     first_date = datetime.today()
     
     file_to_write = []
@@ -133,6 +134,12 @@ def write_to_file(userToken, points):
                     first_date = datetime.strptime(first_date_in_format, "%d%m%y")
                     first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
 
+                    first_week_points_start_index = line.index("<First week points>")
+                    first_week_points_end_index = line.index("</First week points>") - 1
+                    first_weeks_points = line[first_week_points_start_index + 20: first_week_points_end_index]
+                    print("FWP = " + first_weeks_points)
+                    first_weeks_points_not_found = False
+
                     previous_import_date_index = line.index("<Last_update_data>")
                     previous_import_date = line[previous_import_date_index + 19: previous_import_date_index + 27]
                     print("PREVIOUS IMPROT DATE " + previous_import_date)
@@ -147,12 +154,12 @@ def write_to_file(userToken, points):
                 first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
                 print("FIRST IMPORT DATE = " + first_import_date)
             if i == 4:
-                # first_weeks_points_str = line
-                # print("FIRST WEEK POINTS " + str(first_weeks_points))
-                # index = first_weeks_points_str.index("</First week points>") - 1
-                # first_weeks_points_str = line[20:index]
-                # first_weeks_points = int(first_weeks_points_str)
-                pass
+                first_weeks_points_str = line
+                print("FIRST WEEK POINTS " + str(first_weeks_points))
+                index = first_weeks_points_str.index("</First week points>") - 1
+                first_weeks_points_str = line[20:index]
+                first_weeks_points = int(first_weeks_points_str)
+                first_weeks_points_not_found = False
             if i == 5:
                 previous_import_date = line
                 print("PREVIOUS IMPROT DATE " + previous_import_date)
@@ -187,7 +194,7 @@ def write_to_file(userToken, points):
     for exercise in fitness_act_iter:
         exercise_date = exercise.get("start_time").date()
         print(str(exercise_date))
-        if (exercise_date >= first_date.date()) and (exercise_date <= one_week_from_first_import):
+        if first_weeks_points_not_found and (exercise_date >= first_date.date()) and (exercise_date <= one_week_from_first_import):
             exercise_points = points.get_points(exercise)
             first_weeks_points += exercise_points
             print("Added to first_weeks_points")
@@ -227,7 +234,7 @@ def write_to_file(userToken, points):
     for exercise in strength_act_iter:
         exercise_date = exercise.get("start_time").date()
 
-        if (exercise_date >= first_date.date()) and (exercise_date <= one_week_from_first_import):
+        if first_weeks_points_not_found and (exercise_date >= first_date.date()) and (exercise_date <= one_week_from_first_import):
             exercise_points = points.get_points(exercise)
             first_weeks_points += exercise_points
 
