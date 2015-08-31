@@ -136,7 +136,8 @@ def write_to_file(userToken, points):
                     first_week_points_start_index = line.index("<First week points>")
                     first_week_points_end_index = line.index("</First week points>") - 1
                     first_weeks_points = line[first_week_points_start_index + 20: first_week_points_end_index]
-                    first_weeks_points_not_found = False
+                    if first_weeks_points != 0:
+                        first_weeks_points_not_found = False
 
                     previous_import_date_index = line.index("<Last_update_data>")
                     previous_import_date = line[previous_import_date_index + 19: previous_import_date_index + 27]
@@ -154,7 +155,8 @@ def write_to_file(userToken, points):
                 index = first_weeks_points_str.index("</First week points>") - 1
                 first_weeks_points_str = line[20:index]
                 first_weeks_points = int(first_weeks_points_str)
-                first_weeks_points_not_found = False
+                if first_weeks_points != 0:
+                    first_weeks_points_not_found = False
             if i == 5:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:27]
@@ -165,7 +167,7 @@ def write_to_file(userToken, points):
         
 #     If no previous import date found, import exercises from the first of this month
 #     Else use what is in the file
-    previous_import_date_object = date(date.today().year, date.today().month, 1)
+    previous_import_date_object = date(date.today().year, date.today().month, date.today().day - 7)
     if previous_import_date != "":
         print("Previous import date set as object")
         previous_import_date_object = datetime.strptime(previous_import_date, "%d%m%Y").date()
