@@ -127,6 +127,7 @@ def write_to_file(userToken, points):
         read_file = open(path_to_FISS + file_name)
         for i, line in enumerate(read_file):
             if i == 0:
+                #File being read has been written by FISS, therefore is all in one long line
                 try:
                     first_date_index = line.index("<First_import_date>")
                     first_date_in_format = line[first_date_index + 20:first_date_index + 24] + line[first_date_index + 26:first_date_index + 28]
@@ -134,15 +135,28 @@ def write_to_file(userToken, points):
                     first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
 
                     first_week_points_start_index = line.index("<First week points>")
-                    first_week_points_end_index = line.index("</First week points>") - 1
-                    first_weeks_points = line[first_week_points_start_index + 20: first_week_points_end_index]
+                    first_week_points_end_index = line.index("</First week points>")
+                    first_weeks_points = line[first_week_points_start_index + 19: first_week_points_end_index]
                     if first_weeks_points != 0:
                         first_weeks_points_not_found = False
 
                     previous_import_date_index = line.index("<Last_update_data>")
                     previous_import_date = line[previous_import_date_index + 19: previous_import_date_index + 27]
+
+                    outstanding_strength_points_start_index = line.index("<Outstanding_strength_points>")
+                    outstanding_strength_points_end_index = line.index("</Outstanding_strength_points>")
+                    outstanding_strength_points = line[outstanding_strength_points_start_index + 29:outstanding_strength_points_end_index]
+                    
+                    outstanding_fitness_points_start_index = line.index("<Outstanding_fitness_points>")
+                    outstanding_fitness_points_end_index = line.index("</Outstanding_fitness_points>")
+                    outstanding_fitness_points = line[outstanding_fitness_points_start_index + 28: outstanding_fitness_points_end_index]
+
+                    outstanding_sport_points_start_index = line.index("<Outstanding_sport_points>")
+                    outstanding_sport_points_end_index =  line.index("</Outstanding_sport_points>")
+                    outstanding_sport_points = line[outstanding_sport_points_start_index + 26: outstanding_sport_points_end_index]
                 except ValueError:
                     print("File being read is from python not Skyrim")
+            #File has been written by Python, therefore is nicely formatted into lines
             if i == 3:
                 first_date = line
                 first_date_in_format = first_date[20:24] + first_date[26:28]
@@ -160,6 +174,18 @@ def write_to_file(userToken, points):
             if i == 5:
                 previous_import_date = line
                 previous_import_date = previous_import_date[19:27]
+            if i == 7:
+                outstanding_strength_points = line
+                outstanding_strength_points_end_index = outstanding_strength_points.index("</Outstanding_strength_points>") - 1
+                outstanding_strength_points = line[30:outstanding_strength_points_end_index]
+            if i == 8:
+                outstanding_fitness_points = line
+                outstanding_fitness_points_end_index = outstanding_fitness_points.index("</Outstanding_fitness_points>") - 1
+                outstanding_fitness_points = line[29:outstanding_fitness_points_end_index]
+            if i == 9:
+                outstanding_sport_points = line
+                outstanding_sport_points_end_index = outstanding_sport_points.index("</Outstanding_sport_points>") - 1
+                outstanding_sport_points = line[27:outstanding_sport_points_end_index]
         read_file.close()
     else:
         first_date = datetime.today()
@@ -167,7 +193,7 @@ def write_to_file(userToken, points):
         
 #     If no previous import date found, import exercises from the first of this month
 #     Else use what is in the file
-    previous_import_date_object = date(date.today().year, date.today().month, date.today().day - 7)
+    previous_import_date_object = date(date.today().year, date.today().month, date.today().day)
     if previous_import_date != "":
         print("Previous import date set as object")
         previous_import_date_object = datetime.strptime(previous_import_date, "%d%m%Y").date()
@@ -176,6 +202,10 @@ def write_to_file(userToken, points):
     todays_date = time.strftime("%d%m%Y")
     file_to_write.append("<First_import_date> " + first_import_date + " </First_import_date> \n")
     file_to_write.append("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
+
+    file_to_write.append("<Outstanding_strength_points> " + outstanding_strength_points + " </Outstanding_strength_points>\n")
+    file_to_write.append("<Outstanding_fitness_points> " + outstanding_fitness_points + " </Outstanding_fitness_points>\n")
+    file_to_write.append("<Outstanding_sport_points> " + outstanding_sport_points + " </Outstanding_sport_points>\n\n")
 
     one_week_from_first_import = (first_date + timedelta(days = 7)).date()
     first_week_completed = datetime.now().date() > one_week_from_first_import
