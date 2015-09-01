@@ -119,6 +119,10 @@ def write_to_file(userToken, points):
     first_weeks_points = 0
     first_weeks_points_not_found = True
     first_date = datetime.today()
+
+    outstanding_strength_points = 0
+    outstanding_fitness_points = 0
+    outstanding_sport_points = 0
     
     file_to_write = []
 
@@ -203,9 +207,9 @@ def write_to_file(userToken, points):
     file_to_write.append("<First_import_date> " + first_import_date + " </First_import_date> \n")
     file_to_write.append("<Last_update_data> " + todays_date + " </Last_update_data> \n\n")
 
-    file_to_write.append("<Outstanding_strength_points> " + outstanding_strength_points + " </Outstanding_strength_points>\n")
-    file_to_write.append("<Outstanding_fitness_points> " + outstanding_fitness_points + " </Outstanding_fitness_points>\n")
-    file_to_write.append("<Outstanding_sport_points> " + outstanding_sport_points + " </Outstanding_sport_points>\n\n")
+    file_to_write.append("<Outstanding_strength_points> " + str(outstanding_strength_points) + " </Outstanding_strength_points>\n")
+    file_to_write.append("<Outstanding_fitness_points> " + str(outstanding_fitness_points) + " </Outstanding_fitness_points>\n")
+    file_to_write.append("<Outstanding_sport_points> " + str(outstanding_sport_points) + " </Outstanding_sport_points>\n\n")
 
     one_week_from_first_import = (first_date + timedelta(days = 7)).date()
     first_week_completed = datetime.now().date() > one_week_from_first_import
