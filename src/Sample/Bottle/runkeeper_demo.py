@@ -127,7 +127,6 @@ def write_to_file(userToken, points):
     file_to_write = []
 
     if os.path.isfile(path_to_FISS + file_name):
-        print("OS PATH FILE IS TRUE")
         read_file = open(path_to_FISS + file_name)
         for i, line in enumerate(read_file):
             if i == 0:
@@ -199,7 +198,6 @@ def write_to_file(userToken, points):
 #     Else use what is in the file
     previous_import_date_object = date(date.today().year, date.today().month, date.today().day)
     if previous_import_date != "":
-        print("Previous import date set as object")
         previous_import_date_object = datetime.strptime(previous_import_date, "%d%m%Y").date()
         
     file_to_write.append("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
