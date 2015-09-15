@@ -292,7 +292,7 @@ def write_to_file(userToken, points):
 def logout():
     sess = bottle.request.environ['beaker.session']
     sess.delete()
-    subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
+    # subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
     os.kill(os.getpid(), signal.CTRL_C_EVENT)
     bottle.redirect('/')
 

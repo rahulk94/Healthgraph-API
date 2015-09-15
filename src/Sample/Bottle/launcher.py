@@ -5,7 +5,7 @@ new = 2 # open in a new tab, if possible
 
 # open a public URL, in this case, the webbrowser docs
 
-url = "127.0.0.1:8000"
+url = "http://127.0.0.1:8000"
 
 class bottleThread (threading.Thread):
     def __init__(self):
@@ -24,7 +24,7 @@ class browserThread (threading.Thread):
 if __name__ == "__main__":
     thread1 = bottleThread()
     thread2 = browserThread()
-    
+
     thread1.start() 
     thread2.start()
     print"exiting"
