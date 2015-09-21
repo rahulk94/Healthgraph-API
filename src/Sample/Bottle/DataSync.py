@@ -29,7 +29,7 @@ class DataSyncObject:
 #     Returns the contents of the file to be written. 
 #     This includes header information, newly synced exercises, and previous exercise session data.
     def create_file_contents(self):
-#         Initialisation of variables to be used.
+#         Initialization of variables to be used.
         previous_file_data = []
         
         first_import_date = ""

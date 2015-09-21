@@ -19,7 +19,7 @@ import optparse
 import ConfigParser
 import HealthGraphPackage
 
-__extension_developers__ = "Rahul Kumar & Jak Tan"
+__extension_developers__ = "Rahul Kumar & Jak Tan, 2015"
 __original_author__ = "Ali Onur Uyar"
 __license__ = "GPL"
 __copyright__ = "Copyright 2012, Ali Onur Uyar"
@@ -82,6 +82,9 @@ def welcome():
     
     if access_token is not None:
         user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
+#         Calls such as user token .get_XXX is where requests occur. If you need to debug a request or add in more request
+#         types (e.g. we extended this project to pull StrengthActivity's as well as FitnessActivity's), look around here.
+#         Use a debugger as it simplifies the request process so much. 
         profile = user.get_profile()
         
         data_sync_obj = DataSyncObject(user)
@@ -96,26 +99,12 @@ def welcome():
 @bottle.route('/logout')
 def logout():
     sess = bottle.request.environ['beaker.session']
+#     Close the session, launch Skyrim and then kill this process
     sess.delete()
     subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
     os.kill(os.getpid(), signal.SIGTERM)
     bottle.redirect('/')
 
-
-@bottle.route('/view_access_token')
-def view_access_token():
-    sess = bottle.request.environ['beaker.session']
-    access_token = sess.get('rk_access_token')
-    if access_token is not None:
-        remote_addr = bottle.request.get('REMOTE_ADDR')
-        return bottle.template('access_token.html',
-                               remote_addr=remote_addr,
-                               access_token=(access_token 
-                                             if remote_addr == '127.0.0.1'
-                                             else None))
-    else:
-        bottle.redirect('/')
-    
 
 def parse_cmdline(argv=None):
     """Parse command line options.
