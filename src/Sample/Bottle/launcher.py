@@ -8,7 +8,7 @@ new_tab = 2
 url = "http://127.0.0.1:8000"
 
 #Thread used to start the DataSync client
-class bottleThread (threading.Thread):
+class BottleThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
  
@@ -16,7 +16,7 @@ class bottleThread (threading.Thread):
         os.system("python runkeeper_demo.py")
 
 #Thread used to open a new tab in browser on the URL defined above
-class browserThread (threading.Thread):
+class BrowserThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         
@@ -25,8 +25,8 @@ class browserThread (threading.Thread):
 
 
 def main():
-    thread1 = bottleThread()
-    thread2 = browserThread()
+    thread1 = BottleThread()
+    thread2 = BrowserThread()
 
     thread1.start() 
     thread2.start()
