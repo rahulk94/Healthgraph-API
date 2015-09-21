@@ -14,7 +14,7 @@ class BottleThread (threading.Thread):
         threading.Thread.__init__(self)
  
     def run(self):
-        os.system("python runkeeper_demo.py")
+        os.system("python Runkeeper_client.py")
 
 #Thread used to open a new tab in browser on the URL defined above
 class BrowserThread (threading.Thread):
