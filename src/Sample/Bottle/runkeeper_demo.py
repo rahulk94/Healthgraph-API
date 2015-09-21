@@ -14,7 +14,7 @@ import signal
 import os
 import subprocess
 import time
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 import optparse
 import ConfigParser
 import bottle

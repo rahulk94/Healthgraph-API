@@ -1,30 +1,35 @@
 import webbrowser
 import threading
 import os
-new = 2 # open in a new tab, if possible
 
-# open a public URL, in this case, the webbrowser docs
-
+# Argument used to open in a new tab, if possible.
+new_tab = 2 
+# Open a public URL, in this case, the web browser docs
 url = "http://127.0.0.1:8000"
 
+#Thread used to start the DataSync client
 class bottleThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
+ 
     def run(self):
         os.system("python runkeeper_demo.py")
 
+#Thread used to open a new tab in browser on the URL defined above
 class browserThread (threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
+        
     def run(self):
-        webbrowser.open(url,new=new)
+        webbrowser.open(url, new = new_tab)
 
 
-
-if __name__ == "__main__":
+def main():
     thread1 = bottleThread()
     thread2 = browserThread()
 
     thread1.start() 
     thread2.start()
-    print"exiting"
+
+if __name__ == "__main__":
+    main()
