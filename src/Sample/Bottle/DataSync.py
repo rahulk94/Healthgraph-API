@@ -2,8 +2,11 @@ from HealthGraphPackage import Points
 from datetime import datetime, timedelta
 import os
 
+# This object is used to pull data from a user token and write it to a file.
 class DataSyncObject:
     
+#     Path and name of the file to be created. This may vary from PC to PC but currently is hard
+#     coded to work on our machine.
     path_to_FISS = "C:\Program Files (x86)\Steam\steamapps\common\Skyrim\Data\SKSE\Plugins\FISS\\"
     file_name = "Exercise_data.txt"
     
@@ -16,34 +19,48 @@ class DataSyncObject:
 
         self.points_generator = Points.Points(self.fitness_activity_iter, self.strength_activity_iter, self.users_weight_iter)
     
+#     This is the method that should be called outside of this class.
+#     The other methods are all internal methods for breaking up code.
     def sync(self):
         file_to_write = self.create_file_contents()
         self.write_file(file_to_write)
         print("Sync complete!")
-        
+
+#     Returns the contents of the file to be written. 
+#     This includes header information, newly synced exercises, and previous exercise session data.
     def create_file_contents(self):
+#         Initialisation of variables to be used.
         previous_file_data = []
         
         first_import_date = ""
         previous_import_date = ""
         first_weeks_points = 0
         first_weeks_points_not_found = True
-        first_date = datetime.today()
+        first_date = datetime.now()
      
         outstanding_strength_points = 0
         outstanding_fitness_points = 0
         outstanding_sport_points = 0
-     
+
+#         Check if a exercise log file already exists.
+#         If it does, we will be reading in:
+#             - the first datetime the user synced their account, 
+#             - the amount of points they earned in their first week,  
+#             - the last datetime they synced,
+#             - outstanding points a player has in strength, fitness, and sport
         if os.path.isfile(self.path_to_FISS + self.file_name):
             read_file = open(self.path_to_FISS + self.file_name)
             for i, line in enumerate(read_file):
+#                 Depending on the formatting style of the file, we can determine whether it 
+#                 has been written by this datasync client or Skyrim's FISS library.
+
+#                 If it is all written in one long line, it has been written by Skyrim's FISS library,
+#                 otherwise, it is written by this datasync client.
                 if i == 0:
-                    #File being read has been written by FISS, therefore is all in one long line
                     try:
                         first_date_index = line.index("<First_import_date>")
                         first_date_in_format = line[first_date_index + 20:first_date_index + 46]
                         first_date = datetime.strptime(first_date_in_format, "%Y-%m-%d %H:%M:%S.%f")
-                        # first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
      
                         first_week_points_start_index = line.index("<First week points>")
                         first_week_points_end_index = line.index("</First week points>")
@@ -66,13 +83,25 @@ class DataSyncObject:
                         outstanding_sport_points_end_index =  line.index("</Outstanding_sport_points>")
                         outstanding_sport_points = line[outstanding_sport_points_start_index + 26: outstanding_sport_points_end_index]
                     except ValueError:
-                        print("File being read is from python not Skyrim")
-                #File has been written by Python, therefore is nicely formatted into lines
+#                         If the file being read is from our datasync client, it will cause a value error.
+#                         Technically, this should not happen as a user should not be running our client twice in 
+#                         a row, as the launcher will take them to play Skyrim. But if this does happen, a ValueError
+#                         occurs. We can catch this error and then read the file in as needs to be without any of the 
+#                         other code breaking because of the ValueError.
+                        print("File being read is from Python not Skyrim.")
                 if i == 3:
                     first_date = line
                     first_date_in_format = first_date[20:46]
+                    
+#                     If somehow the first sync date has disppeared from the exercise log file, problems will occur.
+#                     In this case, we request that the player go enter the date they first synced to fix this problem.
+#                     Again this is an emergency check to prevent the system from becoming unusable. This should not
+#                     happen in normal circumstances.                    
                     if first_date_in_format == " </Fst":
-                        raise Exception("Please enter the first date the game was synced")
+                        raise Exception("Please enter the first date the game was synced in to the file " + self.file_name 
+                                        + " in the directory " + self.path_to_FISS + ". Please format it as follows\n" +
+                                        "YYYY-MM-DD 00:00:00:0000\nThank you for your co-operation.")
+                    
                     first_date = datetime.strptime(first_date_in_format, "%Y-%m-%d %H:%M:%S.%f")
                     first_import_date = "" +  str("%02d" %first_date.day) + str("%02d" %first_date.month) + str(first_date.year)
                 if i == 4:
@@ -98,15 +127,16 @@ class DataSyncObject:
                     outstanding_sport_points_end_index = outstanding_sport_points.index("</Outstanding_sport_points>") - 1
                     outstanding_sport_points = line[27:outstanding_sport_points_end_index]
             read_file.close()
-        else:
-            first_date = datetime.now()
              
-    #     If no previous import date found, import exercises from the first of this month
-    #     Else use what is in the file
+#         If no previous_import_date was found in the file (i.e. the file did not yet exist), import from now onwards.
+#         Otherwise, read in from when the last import date was in the file and use that date for importing purposes.
         previous_import_date_object = datetime.now()
         if previous_import_date != "":
             previous_import_date_object = datetime.strptime(previous_import_date, "%Y-%m-%d %H:%M:%S.%f")
      
+#         Set up the header information. The first and last lines must be specific lines. If they are not these, FISS
+#         cannot read the file in correctly.
+#         Everything in the file must also be written with an XML style markup.  
         previous_file_data.append("<fiss><Header><Version>1.2</Version><ModName>P4P</ModName></Header>\n<Data>\n\n")
         previous_file_data.append("<First_import_date> " + str(first_date) + " </First_import_date> \n")
         previous_file_data.append("<Last_update_date> " + str(datetime.now()) + " </Last_update_date> \n\n")
@@ -115,42 +145,53 @@ class DataSyncObject:
         previous_file_data.append("<Outstanding_fitness_points> " + str(outstanding_fitness_points) + " </Outstanding_fitness_points>\n")
         previous_file_data.append("<Outstanding_sport_points> " + str(outstanding_sport_points) + " </Outstanding_sport_points>\n\n")
      
+#         Determine whether it's been a week since the first import date
         one_week_from_first_import = (first_date + timedelta(days = 7))
         first_week_completed = datetime.now() > one_week_from_first_import
         previous_file_data.append("<First_week_completed> " + str(first_week_completed) + " </First_week_completed> \n\n")
         
+#         Create an object which stores all of the dates which will be used in figuring out which exercises need to be
+#         pulled.
         last_import_data = last_import_data_object(first_date, first_weeks_points, 
                                                     first_weeks_points_not_found,one_week_from_first_import, 
                                                     previous_import_date_object)
         
         newly_synced_exercise_data = self.sync_with_latest_exercises(last_import_data) 
         
+#         Insert the first weeks points information at the top of the file. This is because it makes it easier to read
+#         in via Python and also FISS.
         previous_file_data.insert(2, newly_synced_exercise_data[len(newly_synced_exercise_data) - 1])
         newly_synced_exercise_data.pop(len(newly_synced_exercise_data) - 1)
+        
+        previous_file_data.append("\n")
+        previous_file_data.append("\n</Data>\n</fiss>")
         
         file_to_write = previous_file_data + newly_synced_exercise_data
         
         return file_to_write
 
-
-    def sync_with_latest_exercises(self, pdo):
-        #Format each exercise and add it to file
-        #May want to create method to format strings as it's mostly boilerplate code
+#     Save the all exercises done since the last sync into a list and return them.
+#     This method also calculates the points earned for each exercise and saves them to the element in the list along with
+#     the datetime of the exercise, the type of exercise, and the exercise activity category (strength, fitness, or sport).
+    def sync_with_latest_exercises(self, last_import_data):
         latest_exercises = []
-        first_weeks_points = pdo.first_weeks_points
+        first_weeks_points = last_import_data.first_weeks_points
         
         index = 1
+#         Sport exercises are defined as FitnessActivities with an Other type on Runkeeper.
+#         Any exercises in the fitness_activity_iter that have Other as their type are then saved into a list and
+#         iterated through later.
         sport_exercises = []
         for exercise in self.fitness_activity_iter:
             exercise_date = exercise.get("start_time")
      
-            if (pdo.first_weeks_points_not_found and (exercise_date >= pdo.first_date)
-                and (exercise_date <= pdo.one_week_from_first_import)):
+            if (last_import_data.first_weeks_points_not_found and (exercise_date >= last_import_data.first_date)
+                and (exercise_date <= last_import_data.one_week_from_first_import)):
                 
                 exercise_points = self.points_generator.get_points(exercise)
                 first_weeks_points += exercise_points
      
-            if pdo.previous_import_date_object <= exercise_date:
+            if last_import_data.previous_import_date_object <= exercise_date:
                 exercise_type = Points.get_exer_name(exercise)
                 exercise_points = self.points_generator.get_points(exercise)
                      
@@ -184,13 +225,13 @@ class DataSyncObject:
         for exercise in self.strength_activity_iter:
             exercise_date = exercise.get("start_time")
      
-            if (pdo.first_weeks_points_not_found and (exercise_date >= pdo.first_date) 
-                and (exercise_date <= pdo.one_week_from_first_import)):
+            if (last_import_data.first_weeks_points_not_found and (exercise_date >= last_import_data.first_date) 
+                and (exercise_date <= last_import_data.one_week_from_first_import)):
                 
                 exercise_points = self.points_generator.get_points(exercise)
                 first_weeks_points += exercise_points
      
-            if pdo.previous_import_date_object <= exercise_date:
+            if last_import_data.previous_import_date_object <= exercise_date:
                 exercise_type = Points.get_exer_name(exercise)
                 exercise_points = self.points_generator.get_points(exercise)
                  
@@ -203,20 +244,20 @@ class DataSyncObject:
                 index += 1
          
         latest_exercises.append("\n")
-        latest_exercises.append("\n")
-        latest_exercises.append("\n</Data>\n</fiss>")
         latest_exercises.append("<First week points> " + str(first_weeks_points) + " </First week points>\n")
 
         return latest_exercises
 
     def write_file(self, file_contents):
+#         Using the w overwrites any existing file with the same path + name, and creates the file if it does not exist.
         with open(self.path_to_FISS + self.file_name, "w") as fwrite:
             for line in file_contents:
                 fwrite.write(line)
-        
         print("Write to file complete")
 
 
+# Object used to store import data needed to calculate whether an exercise is newer than the last import date,
+# as well as if first week points need to be calculated.
 class last_import_data_object:
     def __init__(self, first_date, first_weeks_points, first_weeks_points_not_found,
                   one_week_from_first_import, previous_import_date_object):

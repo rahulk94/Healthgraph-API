@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import webbrowser
 import threading
 import os

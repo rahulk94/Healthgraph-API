@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Demo Application for HealthGraph-API Python Library developed using Bottle 
 fast, simple and lightweight WSGI micro web-framework for Python.
 
@@ -281,8 +280,8 @@ def welcome():
 def logout():
     sess = bottle.request.environ['beaker.session']
     sess.delete()
-    # subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
-#     os.kill(os.getpid(), signal.CTRL_C_EVENT)
+    subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
+    os.kill(os.getpid(), signal.SIGTERM)
     bottle.redirect('/')
 
 
