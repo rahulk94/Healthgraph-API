@@ -93,7 +93,8 @@ class Points:
 			exercise_points = self.get_points(feed_item)
 # 			print (exercise_points)
 			total_points += exercise_points
-		
+
+		print("Total points earned = " + str(total_points))
 		return total_points
 
 	#pass this an activity feed item and it will return points, it will iterate through exercises if it is a strength feed item
@@ -108,13 +109,13 @@ class Points:
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
 				points = self.activity_database[sport_type] * duration
-				print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
 				#cardio
 				try:
 					points = self.activity_database[exercise_type] * duration
-					print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
+					# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 					return points
 				except:
 					return 0
@@ -143,11 +144,11 @@ class Points:
 				#weight modifier for dumbbell exercises
 				if "dumbbell" in get_exer_name(feed).lower():
 					weight = weight*2
-				print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
+				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
 			return points
 
-		print("No points calculated")
+		print("No points calculated for an exercise")
 		return 0
 
 

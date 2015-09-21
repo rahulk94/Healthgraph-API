@@ -14,6 +14,7 @@ import signal
 import os
 import subprocess
 import time
+import threading
 from datetime import datetime, date, timedelta
 import optparse
 import ConfigParser
@@ -88,25 +89,30 @@ def welcome():
     sess = bottle.request.environ['beaker.session']
     access_token = sess.get('rk_access_token')
     
-    if access_token is not None:
-        user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
-        profile = user.get_profile()
-        records = user.get_records()
+    try:
+        if access_token is not None:
+            user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
+            profile = user.get_profile()
+            records = user.get_records()
 
-        act_iter = user.get_fitness_activity_iter()
-        strength_act_iter = user.get_strength_activity_iter()
-        weight_iter = user.get_weight_measurement_iter()
-        
-        points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter,weight_iter)
-        write_to_file(user, points)
-        
-        activities = [act_iter.next() for _ in range(1)] 
-        return bottle.template('welcome.html', 
-                               profile=profile,
-                               activities=activities, 
-                               records=records.get_totals())
-    else:
-        bottle.redirect('/')
+            act_iter = user.get_fitness_activity_iter()
+            strength_act_iter = user.get_strength_activity_iter()
+            weight_iter = user.get_weight_measurement_iter()
+            
+            points = HealthGraphPackage.Points.Points(act_iter,strength_act_iter,weight_iter)
+            write_to_file(user, points)
+            
+            activities = [act_iter.next() for _ in range(1)] 
+            
+            return bottle.template('welcome.html', 
+                                   profile=profile,
+                                   activities=activities, 
+                                   records=records.get_totals())
+        else:
+            bottle.redirect('/')
+    except Exception:
+        # print("Exception. Relogin")
+        bottle.redirect('/welcome')
 
 
 def write_to_file(userToken, points):    
@@ -292,11 +298,22 @@ def write_to_file(userToken, points):
 def logout():
     sess = bottle.request.environ['beaker.session']
     sess.delete()
-    # subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
-    os.kill(os.getpid(), signal.CTRL_C_EVENT)
-    bottle.redirect('/')
+    subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
+    bottle.redirect('/terminate')
 
+class terminateThread (threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        time.sleep(2)
+        os.kill(signal.CTRL_C_EVENT, 0)
 
+@bottle.route('/terminate')
+def terminate():
+    termThread = terminateThread()
+    termThread.start()
+    return bottle.template('terminate.html')
+    
 @bottle.route('/view_access_token')
 def view_access_token():
     sess = bottle.request.environ['beaker.session']
