@@ -14,6 +14,8 @@ import os
 import sys
 import signal
 import subprocess
+import time
+import threading
 import bottle
 import optparse
 import ConfigParser
@@ -48,6 +50,15 @@ class ConfigurationError(Exception):
     pass
 
 
+class terminateThread (threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+
+    def run(self):
+        time.sleep(2)
+        os.kill(signal.CTRL_C_EVENT, 0)
+
+
 @bottle.route('/')
 def index():
     sess = bottle.request.environ['beaker.session']
@@ -73,27 +84,29 @@ def login():
         sess['rk_access_token'] = access_token
         sess.save()
         bottle.redirect('/welcome')
-        
+
 
 @bottle.route('/welcome')
 def welcome():
     sess = bottle.request.environ['beaker.session']
     access_token = sess.get('rk_access_token')
-    
-    if access_token is not None:
-        user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
-#         Calls such as user token .get_XXX is where requests occur. If you need to debug a request or add in more request
-#         types (e.g. we extended this project to pull StrengthActivity's as well as FitnessActivity's), look around here.
-#         Use a debugger as it simplifies the request process so much. 
-        profile = user.get_profile()
-        
-        data_sync_obj = DataSyncObject(user)
-        data_sync_obj.sync()
-        
-        return bottle.template('welcome.html', 
-                               profile=profile)
-    else:
-        bottle.redirect('/')
+    try:
+        if access_token is not None:
+            user = HealthGraphPackage.User(session=HealthGraphPackage.Session(access_token))
+    #         Calls such as user token .get_XXX is where requests occur. If you need to debug a request or add in more request
+    #         types (e.g. we extended this project to pull StrengthActivity's as well as FitnessActivity's), look around here.
+    #         Use a debugger as it simplifies the request process so much. 
+            profile = user.get_profile()
+            
+            data_sync_obj = DataSyncObject(user)
+            data_sync_obj.sync()
+            
+            return bottle.template('welcome.html', 
+                                   profile=profile)
+        else:
+            bottle.redirect('/')
+    except Exception:
+        bottle.redirect('/welcome')
 
 
 @bottle.route('/logout')
@@ -102,8 +115,14 @@ def logout():
 #     Close the session, launch Skyrim and then kill this process
     sess.delete()
     subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
-    os.kill(os.getpid(), signal.SIGTERM)
-    bottle.redirect('/')
+    bottle.redirect('/terminate')
+
+
+@bottle.route('/terminate')
+def terminate():
+    termThread = terminateThread()
+    termThread.start()
+    return bottle.template('terminate.html')
 
 
 def parse_cmdline(argv=None):
