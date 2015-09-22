@@ -2,7 +2,9 @@ import HealthGraphPackage
 
 class Points:
 
+	#Database for fitness activities (cardio/sports)
 	activity_database = {	
+
 					#sports activities
 					'Mountain Biking': 2.1
 					,'Competitive Rowing': 2
@@ -80,21 +82,20 @@ class Points:
 		self.strength_activity_iter = strength_iterator
 		self.bodyweight = get_bodyweight(weight_iterator.next())
 		
+
+	#iterates through the fitness activities and strength activites then generates the total points for the user
 	def get_total_points(self):
 		total_points = 0
 		
 		for feed_item in self.fitness_activity_iter:
-			# print(get_start_time(feed_item))
 			exercise_points = self.get_points(feed_item)
 			total_points += exercise_points
 
 		for feed_item in self.strength_activity_iter:
 			#may need to do a check here for date before adding points of a feed
 			exercise_points = self.get_points(feed_item)
-# 			print (exercise_points)
 			total_points += exercise_points
 
-		print("Total points earned = " + str(total_points))
 		return total_points
 
 	#pass this an activity feed item and it will return points, it will iterate through exercises if it is a strength feed item
@@ -105,54 +106,54 @@ class Points:
 		if activity == "FitnessActivity":
 			duration = feed.get("duration")/60
 			if exercise_type == "Other":
+
 				#sport activity
 				sport_act = feed.get_activity_detail()
 				sport_type = get_secondary_type(sport_act)
 				points = self.activity_database[sport_type] * duration
-				# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 				return points
 			else:
-				#cardio
+				#cardio activities, if exercise doesn't exist in database return 0
 				try:
 					points = self.activity_database[exercise_type] * duration
-					# print("POINTS FOR " + get_exer_name(feed) + " = " + str(points))
 					return points
 				except:
 					return 0
 			
 		elif activity == "StrengthActivity":
+
 			#Get type of exercise
 			tonnage = 0
 			str_act = feed.get_activity_detail()
 			info_set = get_exercise_set(str_act)
-# 			print(str_act.get('exercises'))
 			for ex_set in info_set:
 				weight = get_weight(ex_set)
 				
-				#adjusting for bodyweight exercises
+				#adjusting tonnage for bodyweight exercises
 				if weight == 0:
 					weight = self.bodyweight*0.4
 					
 				#weight modifier for stupid shrugs	
 				if "shrug" in get_exer_name(feed).lower():
 					weight = weight/11
+
+					#weight modifier for dumbbell exercises
+				if "dumbbell" in get_exer_name(feed).lower():
+					weight = weight*2
 					
 				reps = get_reps(ex_set)
 				tonnage += weight * reps
+
+				#29 is an arbitrary constant used to scale tonnage with the points system. See report for more de-tails
 				points = int(round(tonnage/29))
 				
-				#weight modifier for dumbbell exercises
-				if "dumbbell" in get_exer_name(feed).lower():
-					weight = weight*2
-				# print("POINTS FOR " + get_exer_name(feed) + " = "+ str(points))
 				
 			return points
 
-		print("No points calculated for an exercise")
 		return 0
 
 
-#WRAPPER METHODS FOR DICTIONARY INFO RETRIEVAL	
+#STATIC WRAPPER METHODS FOR DICTIONARY INFO RETRIEVAL	
 def get_exercise_type(act):
 	pass
 

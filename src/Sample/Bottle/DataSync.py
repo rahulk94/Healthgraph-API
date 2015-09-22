@@ -133,7 +133,23 @@ class DataSyncObject:
         previous_import_date_object = datetime.now()
         if previous_import_date != "":
             previous_import_date_object = datetime.strptime(previous_import_date, "%Y-%m-%d %H:%M:%S.%f")
-     
+          
+#         Determine whether it's been a week since the first import date
+        one_week_from_first_import = (first_date + timedelta(days = 7))
+        first_week_completed = datetime.now() > one_week_from_first_import
+        
+#         Create an object which stores all of the dates which will be used in figuring out which exercises need to be
+#         pulled.
+        last_import_data = last_import_data_object(first_date, first_weeks_points, 
+                                                    first_weeks_points_not_found,one_week_from_first_import, 
+                                                    previous_import_date_object)
+        
+        newly_synced_exercise_data = self.sync_with_latest_exercises(last_import_data) 
+        
+        outstanding_strength_points = int(outstanding_strength_points) + newly_synced_exercise_data[0]
+        outstanding_fitness_points = int(outstanding_fitness_points) + newly_synced_exercise_data[1]
+        outstanding_sport_points = int(outstanding_sport_points) + newly_synced_exercise_data[2]
+
 #         Set up the header information. The first and last lines must be specific lines. If they are not these, FISS
 #         cannot read the file in correctly.
 #         Everything in the file must also be written with an XML style markup.  
@@ -144,40 +160,28 @@ class DataSyncObject:
         previous_file_data.append("<Outstanding_strength_points> " + str(outstanding_strength_points) + " </Outstanding_strength_points>\n")
         previous_file_data.append("<Outstanding_fitness_points> " + str(outstanding_fitness_points) + " </Outstanding_fitness_points>\n")
         previous_file_data.append("<Outstanding_sport_points> " + str(outstanding_sport_points) + " </Outstanding_sport_points>\n\n")
-     
-#         Determine whether it's been a week since the first import date
-        one_week_from_first_import = (first_date + timedelta(days = 7))
-        first_week_completed = datetime.now() > one_week_from_first_import
         previous_file_data.append("<First_week_completed> " + str(first_week_completed) + " </First_week_completed> \n\n")
-        
-#         Create an object which stores all of the dates which will be used in figuring out which exercises need to be
-#         pulled.
-        last_import_data = last_import_data_object(first_date, first_weeks_points, 
-                                                    first_weeks_points_not_found,one_week_from_first_import, 
-                                                    previous_import_date_object)
-        
-        newly_synced_exercise_data = self.sync_with_latest_exercises(last_import_data) 
+
         
 #         Insert the first weeks points information at the top of the file. This is because it makes it easier to read
 #         in via Python and also FISS.
-        previous_file_data.insert(2, newly_synced_exercise_data[len(newly_synced_exercise_data) - 1])
+        first_week_points = "<First week points> " + str(newly_synced_exercise_data[3]) + " </First week points>\n"
+        previous_file_data.insert(2, first_week_points)
         newly_synced_exercise_data.pop(len(newly_synced_exercise_data) - 1)
         
         previous_file_data.append("\n")
         previous_file_data.append("\n</Data>\n</fiss>")
         
-        file_to_write = previous_file_data + newly_synced_exercise_data
+        file_to_write = previous_file_data
         
         return file_to_write
 
-#     Save the all exercises done since the last sync into a list and return them.
-#     This method also calculates the points earned for each exercise and saves them to the element in the list along with
-#     the datetime of the exercise, the type of exercise, and the exercise activity category (strength, fitness, or sport).
+#     Save the total points the player has earned from exercises since the last sync and return it via a list.
+#     The list is ordered by [new_strength_points, new_fitness_points, new_sport_points, first_week_points)
     def sync_with_latest_exercises(self, last_import_data):
-        latest_exercises = []
+        total_points = [0, 0, 0, 0]
         first_weeks_points = last_import_data.first_weeks_points
         
-        index = 1
 #         Sport exercises are defined as FitnessActivities with an Other type on Runkeeper.
 #         Any exercises in the fitness_activity_iter that have Other as their type are then saved into a list and
 #         iterated through later.
@@ -192,36 +196,17 @@ class DataSyncObject:
                 first_weeks_points += exercise_points
      
             if last_import_data.previous_import_date_object <= exercise_date:
-                exercise_type = Points.get_exer_name(exercise)
                 exercise_points = self.points_generator.get_points(exercise)
                      
                 if Points.get_type(exercise) != 'Other':
-                    fitness_exercise = "<fitness_exercise " + str(index) + "> "
-                    fitness_exercise += "<type> " + exercise_type + " </type> "
-                    fitness_exercise += "<points> " + str(exercise_points) + " </points> "
-                    fitness_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
-                    fitness_exercise += "</fitness_exercise " + str(index) + ">"
-                    latest_exercises.append(fitness_exercise + "\n")
-                    index += 1
+                    total_points[1] += exercise_points
                 else:
                     sport_exercises.append(exercise)
-        latest_exercises.append("\n")
          
-        index = 1
         for exercise in sport_exercises:
-            exercise_type = Points.get_exer_name(exercise)
             exercise_points = self.points_generator.get_points(exercise)
-             
-            sport_exercise = "<sport_exercise " + str(index) + "> "
-            sport_exercise += "<type> " + exercise_type + " </type> "
-            sport_exercise += "<points> " + str(exercise_points) + " </points> "
-            sport_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
-            sport_exercise += "</sport_exercise " + str(index) + ">"
-            latest_exercises.append(sport_exercise + "\n")
-            index += 1
-        latest_exercises.append("\n")
-         
-        index = 1
+            total_points[2] += exercise_points
+
         for exercise in self.strength_activity_iter:
             exercise_date = exercise.get("start_time")
      
@@ -232,21 +217,11 @@ class DataSyncObject:
                 first_weeks_points += exercise_points
      
             if last_import_data.previous_import_date_object <= exercise_date:
-                exercise_type = Points.get_exer_name(exercise)
                 exercise_points = self.points_generator.get_points(exercise)
-                 
-                strength_exercise = "<strength_exercise " + str(index) + "> "
-                strength_exercise += "<type> " + exercise_type + " </type> "
-                strength_exercise += "<points> " + str(exercise_points) + " </points> "
-                strength_exercise += "<start_time> " + str(exercise_date) + " </start_time> "
-                strength_exercise += "</strength_exercise " + str(index) + ">"
-                latest_exercises.append(strength_exercise + "\n")
-                index += 1
-         
-        latest_exercises.append("\n")
-        latest_exercises.append("<First week points> " + str(first_weeks_points) + " </First week points>\n")
+                total_points[0] += exercise_points
 
-        return latest_exercises
+        total_points[3] = first_weeks_points
+        return total_points
 
     def write_file(self, file_contents):
 #         Using the w overwrites any existing file with the same path + name, and creates the file if it does not exist.
