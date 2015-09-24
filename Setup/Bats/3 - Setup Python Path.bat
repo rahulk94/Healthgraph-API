@@ -1,2 +1,2 @@
-start python PythonFiles/PythonPath.py
+start python ../PythonFiles/PythonPath.py
 exit

@@ -1,2 +1,2 @@
-start python PythonFiles/get-pip.py
+start python ../PythonFiles/get-pip.py
 exit

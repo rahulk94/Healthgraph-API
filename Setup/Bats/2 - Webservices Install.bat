@@ -1,2 +1,2 @@
-pip install -r ../src/Sample/Bottle/requirements.txt
+pip install -r ../../src/Sample/Bottle/requirements.txt
 pause
