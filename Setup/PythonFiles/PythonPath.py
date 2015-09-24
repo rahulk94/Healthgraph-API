@@ -24,4 +24,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	exit = raw_input("Press any key to exit")
+	exit = raw_input("Press enter to exit")
