@@ -164,7 +164,7 @@ def main():
         # Clean up our temporary working directory
         if tmpdir:
             shutil.rmtree(tmpdir, ignore_errors=True)
-        exit = raw_input("Press any key to exit")
+        exit = raw_input("Press enter to exit")
 
 
 DATA = b"""
