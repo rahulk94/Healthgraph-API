@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import webbrowser
 import threading
+import sys
 import os
 
 # Argument used to open in a new tab, if possible.
