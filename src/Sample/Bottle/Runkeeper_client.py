@@ -27,6 +27,8 @@ __license__ = "GPL"
 __copyright__ = "Copyright 2012, Ali Onur Uyar"
 __credits__ = ["Ali Onur Uyar"]
 
+path_to_skyrim = ["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"]
+
 # Defaults
 conf = {'baseurl': 'http://127.0.0.1:8000',
         'bindaddr': '127.0.0.1',
@@ -114,7 +116,7 @@ def logout():
     sess = bottle.request.environ['beaker.session']
 #     Close the session, launch Skyrim and then kill this process
     sess.delete()
-    subprocess.call(["C:/Program Files (x86)/Steam/steamapps/common/Skyrim/SkyrimLauncher.exe"])
+    subprocess.call(path_to_skyrim)
     bottle.redirect('/terminate')
 
 
